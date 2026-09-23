@@ -1,0 +1,618 @@
+:root {
+  /* The panel sits a shade below its cards so they lift off it. */
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #16181d;
+  --muted: #5c6370;
+  --line: #dfe2e8;
+  --accent: #0a5ed7;
+  --danger: #b3261e;
+  --chip: #eceef2;
+  --locked-bg: #e8eaef;
+  --locked-line: #ccd1da;
+  --expired-bg: #fdefed;
+  --expired-line: #f0cdc7;
+  --c1-red: #b0483a;
+  /* Desaturated green: present enough to read as "this just appeared", quiet enough
+     not to compete with the list below it. */
+  --suggest-bg: #dceeda;
+  --suggest-line: #acc1b1;
+  --suggest-card-line: #b7cfc0;
+  --suggest-accent: #4a8f63;
+  /* The glow carries further on a white card, so it is mixed weaker here than in dark. */
+  --glow-strength: 6%;
+  --danger-solid: #b3261e;
+  --danger-solid-hover: #8f1e18;
+  --on-danger: #ffffff;
+  --c1-navy: #013d5b;
+  --c1-navy-hover: #02526f;
+  /* Fixed rather than per-product: account branding only arrives when the lookup
+     succeeds, and a navy glow disappears against a dark panel. */
+  --c1-blue: #0a6ba8;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181d;
+    --surface: #191c22;
+    --fg: #e9eaee;
+    --muted: #9aa0ac;
+    --line: #343842;
+    --accent: #6ea8ff;
+    --danger: #ff8a80;
+    --chip: #21242b;
+    --locked-bg: #2b2d34;
+    --locked-line: #3a3f4a;
+    --expired-bg: #2e2226;
+    --expired-line: #4a3236;
+    /* Lighter than the light-theme red so it still reads as a glow on a dark card. */
+    --c1-red: #e08b80;
+    --glow-strength: 9%;
+    --suggest-bg: #314136;
+    --suggest-line: #5f8166;
+    --suggest-card-line: #486954;
+    --suggest-accent: #7fc79a;
+    --c1-blue: #6ea8ff;
+    --danger-solid: #c62828;
+    --danger-solid-hover: #a81f1f;
+    --on-danger: #ffffff;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* .field sets display:flex, which would otherwise beat the hidden attribute. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.bar {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.field-compact {
+  flex: 0 0 auto;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.field-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  color: inherit;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 6px 8px;
+  min-width: 0;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Native select arrows sit hard against the edge and cannot be moved, so draw our own. */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a909c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  padding-right: 40px;
+}
+
+#account {
+  height: 40px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+button {
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.icon-button {
+  flex: 0 0 auto;
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.icon-button:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+hr.divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 22px 0;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+/* Reads as a text link but keeps a button's height, so it lines up beside Save. */
+button.link {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+button.link:hover:not(:disabled) {
+  color: var(--fg);
+  border-color: transparent;
+}
+
+/* The pressed button stays legible while its siblings dim. */
+button.is-busy:disabled {
+  opacity: 1;
+  color: var(--muted);
+}
+
+/* Capital One's own navy, fixed rather than per-product: branding only arrives when the
+   account lookup succeeds, and across their card range there is no guarantee of a colour
+   that carries white text. White on this is about 13:1. */
+button.primary {
+  width: 100%;
+  background: var(--c1-navy);
+  border-color: var(--c1-navy);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--c1-navy-hover);
+  border-color: var(--c1-navy-hover);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 22%);
+}
+
+/* Delete fills solid red on hover and on keyboard focus. Once armed it stays red and
+   only darkens on hover. White on these reds clears 4.5:1 in both themes. */
+button.danger:hover:not(:disabled),
+button.danger:focus-visible,
+button.danger.armed {
+  background: var(--danger-solid);
+  border-color: var(--danger-solid);
+  color: var(--on-danger);
+}
+
+button.danger.armed:hover:not(:disabled) {
+  background: var(--danger-solid-hover);
+  border-color: var(--danger-solid-hover);
+}
+
+#search {
+  flex: 1;
+  padding: 13px 12px;
+  font-size: 14px;
+  font-style: normal;
+}
+
+#search::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+/* Values that come from Capital One rather than from the user. Sized to line up with
+   the label input beside it. */
+.field-static {
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--chip);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.setup {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.setup summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.setup summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.setup[open] summary {
+  margin-bottom: 8px;
+}
+
+.setup-fields {
+  display: flex;
+  gap: 8px;
+}
+
+.setup-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* The shared input rule gives it a box and padding, which a checkbox does not want. */
+.setup-toggle input {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  accent-color: var(--c1-blue);
+}
+
+.hint {
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.status {
+  margin: 0 0 10px;
+  color: var(--muted);
+  min-height: 1.45em;
+}
+
+.status[data-tone="error"] {
+  color: var(--danger);
+}
+
+/* Counts and progress read as a caption for the list; anything longer stays left. */
+.status[data-align="center"] {
+  text-align: center;
+}
+
+@keyframes status-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.status[data-busy="true"] {
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status[data-busy="true"] {
+    animation: none;
+  }
+}
+
+.status a {
+  color: var(--accent);
+}
+
+.status a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* One fixed colour in both themes. A panel that only exists while a live card number is
+   on screen should not be mistakable for the rest of the UI. White on this navy is 11.5:1. */
+.captured {
+  border: 1px solid var(--c1-navy);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: var(--c1-navy);
+  color: #ffffff;
+}
+
+/* Everything inside goes ghost: transparent on the navy, never a white box on it. */
+.captured button {
+  background: transparent;
+  border-color: rgb(255 255 255 / 45%);
+  color: #ffffff;
+}
+
+.captured button:hover:not(:disabled) {
+  background: rgb(255 255 255 / 12%);
+  border-color: #ffffff;
+}
+
+.captured button:focus-visible {
+  outline-color: #ffffff;
+}
+
+.captured-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.captured-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.captured-head h2 {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgb(255 255 255 / 75%);
+}
+
+.captured-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.captured-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  flex-wrap: wrap;
+}
+
+.captured-label {
+  color: rgb(255 255 255 / 70%);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.captured-value {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  user-select: all;
+}
+
+.captured-row button {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.captured-note {
+  margin: 8px 0 0;
+  color: rgb(255 255 255 / 70%);
+  font-size: 11px;
+}
+
+.captured-countdown {
+  margin: 4px 0 0;
+  color: rgb(255 255 255 / 55%);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.suggested {
+  margin-bottom: 16px;
+  padding: 10px;
+  border: 1px solid var(--suggest-line);
+  border-radius: 10px;
+  background: var(--suggest-bg);
+}
+
+/* Green rather than blue in here, so the glow belongs to the panel it sits on. */
+.suggested .card {
+  --card-accent: var(--suggest-accent);
+  --line: var(--suggest-card-line);
+}
+
+.suggested-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  /* Tints the hover border and the cursor glow; restated per card state below. */
+  --card-accent: var(--c1-blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 11%);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Capital One's merchant logos are drawn for light backgrounds, so this tile stays
+   light in both themes, otherwise dark wordmarks disappear in dark mode. */
+.card-logo {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid rgb(0 0 0 / 10%);
+  background: #f4f5f7;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.card-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.card-logo-letter {
+  font-size: 16px;
+  font-weight: 700;
+  color: #3c4149;
+}
+
+.card-body {
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  padding-left: 10px;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--card-accent) 45%, var(--line));
+  box-shadow: 0 2px 5px rgb(0 0 0 / 13%);
+}
+
+/* A soft glow that follows the cursor. panel.js supplies the coordinates. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  background: radial-gradient(
+    340px circle at var(--x, 50%) var(--y, 50%),
+    color-mix(in srgb, var(--card-accent) var(--glow-strength), transparent),
+    transparent 75%
+  );
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card::before {
+    transition: none;
+  }
+}
+
+/* A deactivated card is as inert as a locked one, so it reads the same way. */
+.card[data-locked="true"],
+.card[data-deactivated="true"] {
+  background: var(--locked-bg);
+  border-color: var(--locked-line);
+}
+
+.card[data-expired="true"] {
+  --card-accent: var(--c1-red);
+  background: var(--expired-bg);
+  border-color: var(--expired-line);
+}
+
+/* The plain rule disappears against these muted backgrounds. */
+.card[data-locked="true"] .card-body,
+.card[data-deactivated="true"] .card-body,
+.card[data-expired="true"] .card-body {
+  border-left-color: color-mix(in srgb, var(--fg) 22%, transparent);
+}
+
+.card-name {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.card-meta,
+.card-holder,
+.card-status {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.card-flag {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.card-actions button {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* Stands in for the buttons while a delete is in flight, at the height they had. */
+.card-busy {
+  margin: 0;
+  align-self: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.rename-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rename-form input {
+  flex: 1;
+}

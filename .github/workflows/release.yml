@@ -1,0 +1,56 @@
+name: Release
+
+# Every push to main updates the release pull request. Merging that pull request pushes
+# to main again, and that run tags the version, creates the GitHub Release and attaches
+# the zip. Only commits starting with fix: or feat: count towards a release.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+
+      - name: Run tests
+        run: node tools/capture.test.mjs
+
+      - name: Update the release pull request, or release
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # 5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # The zip keeps one name across versions, so the README's
+      # releases/latest/download/virtual-cards-extension.zip link never changes.
+      # Its contents sit in a folder, so unzipping never scatters files.
+      - name: Zip the extension
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          VERSION=$(node -p "require('./manifest.json').version")
+          test "v$VERSION" = "$TAG" || { echo "Release $TAG but manifest.json says $VERSION"; exit 1; }
+          mkdir -p dist/virtual-cards-extension
+          cp -R manifest.json service-worker.js content sidepanel src icons LICENSE dist/virtual-cards-extension/
+          (cd dist && zip -r -X virtual-cards-extension.zip virtual-cards-extension)
+
+      - name: Attach the zip to the release
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: gh release upload "$TAG" dist/virtual-cards-extension.zip

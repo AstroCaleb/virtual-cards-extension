@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Card Helper</title>
+  <link rel="stylesheet" href="panel.css" />
+</head>
+
+<body>
+  <header class="bar">
+    <label class="field">
+      <span class="field-label">Account</span>
+      <select id="account"></select>
+    </label>
+    <button id="refresh" type="button" class="icon-button" title="Refresh" aria-label="Refresh">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" />
+        <path d="M13.5 1.9v3.3h-3.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </button>
+  </header>
+
+  <details id="account-setup" class="setup">
+    <summary>Account settings</summary>
+    <p class="hint">
+      The label is yours to change. Card name and last 4 come from your Capital One profile and
+      are sent with every rename, lock and delete, so they are dynamically shown here and not editable.
+    </p>
+    <div class="setup-fields">
+      <label class="field">
+        <span class="field-label">Label</span>
+        <input id="account-label" type="text" autocomplete="off" />
+      </label>
+      <div class="field">
+        <span class="field-label">Card name</span>
+        <p class="field-static" id="card-name"></p>
+      </div>
+      <div class="field">
+        <span class="field-label">Card last 4</span>
+        <p class="field-static" id="card-last-four"></p>
+      </div>
+    </div>
+    <label class="setup-toggle">
+      <input id="auto-open" type="checkbox" />
+      <span>Open Capital One in a background tab when this panel needs one</span>
+    </label>
+  </details>
+
+  <div class="bar">
+    <button id="create" type="button" class="primary">New card</button>
+  </div>
+
+  <hr id="captured-divider" class="divider" hidden />
+
+  <section id="captured" class="captured" hidden>
+    <div class="captured-head">
+      <h2>Card details</h2>
+      <div class="captured-head-actions">
+        <button id="captured-toggle" type="button" class="ghost" aria-pressed="false">Show</button>
+        <button id="captured-dismiss" type="button" class="ghost">Dismiss</button>
+      </div>
+    </div>
+    <p class="captured-name" id="captured-name" hidden></p>
+    <p class="captured-row">
+      <span class="captured-value" id="captured-number"></span>
+      <button type="button" data-copy="number">Copy</button>
+    </p>
+    <p class="captured-row">
+      <span class="captured-label">Exp</span>
+      <span class="captured-value" id="captured-expiry"></span>
+      <button type="button" data-copy="expiry">Copy</button>
+      <span class="captured-label">CVV</span>
+      <span class="captured-value" id="captured-cvv"></span>
+      <button type="button" data-copy="cvv">Copy</button>
+    </p>
+    <p class="captured-note">
+      Hidden by default, and copying works without showing it. Held in this panel's memory only,
+      and cleared after three minutes.
+    </p>
+    <p class="captured-countdown">Clears in <span id="captured-countdown"></span></p>
+  </section>
+
+  <hr class="divider" />
+
+  <div class="bar">
+    <label class="field">
+      <span class="field-label">Status</span>
+      <select id="status-filter">
+        <option value="all">All</option>
+        <option value="active">Active, locked &amp; used</option>
+        <option value="expired">Expired</option>
+        <option value="deactivated">Deactivated</option>
+      </select>
+    </label>
+    <label class="field" id="cardholder-field" hidden>
+      <span class="field-label">Cardholder</span>
+      <select id="cardholder"></select>
+    </label>
+  </div>
+
+  <div class="bar">
+    <input id="search" type="search" placeholder="Search cards by name" autocomplete="off" />
+  </div>
+
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <section id="suggested" class="suggested" hidden>
+    <h2 id="suggested-title" class="suggested-title">For this site</h2>
+    <ul id="suggested-cards" class="cards"></ul>
+  </section>
+
+  <ul id="cards" class="cards"></ul>
+
+  <template id="card-template">
+    <li class="card">
+      <div class="card-logo" aria-hidden="true"></div>
+      <div class="card-body">
+        <div class="card-main">
+          <p class="card-name"></p>
+          <p class="card-meta"></p>
+          <p class="card-holder"></p>
+          <p class="card-status"></p>
+        </div>
+        <div class="card-actions">
+          <button type="button" data-action="reveal">Show</button>
+          <button type="button" data-action="lock"></button>
+          <button type="button" data-action="rename">Rename</button>
+          <button type="button" data-action="delete" class="danger">Delete</button>
+        </div>
+      </div>
+    </li>
+  </template>
+
+  <template id="suggested-template">
+    <li class="card">
+      <div class="card-logo" aria-hidden="true"></div>
+      <div class="card-body">
+        <div class="card-main">
+          <p class="card-name"></p>
+          <p class="card-meta"></p>
+        </div>
+        <div class="card-actions">
+          <button type="button" data-action="reveal">Show</button>
+        </div>
+      </div>
+    </li>
+  </template>
+
+  <script type="module" src="panel.js"></script>
+</body>
+
+</html>

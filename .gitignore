@@ -1,0 +1,5 @@
+.DS_Store
+# Release zips are built by the workflow, never committed.
+/dist/
+# A signing key must never be committed.
+*.pem
