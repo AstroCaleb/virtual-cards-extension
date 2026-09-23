@@ -5,6 +5,10 @@ Everything the Developer Dashboard asks for, ready to paste. Keep this in step w
 
 > Last updated: 2026-09-23
 
+**Item ID:** `aclghbjbgimapkibeejappfhclocdjcc`
+
+**Listing:** https://chromewebstore.google.com/detail/aclghbjbgimapkibeejappfhclocdjcc (unlisted; opens once published)
+
 ## Store listing tab
 
 **Name** (must match `manifest.json`)
@@ -71,7 +75,7 @@ Source code and privacy policy: https://github.com/AstroCaleb/virtual-cards-exte
 | Screenshot 1: card list | 1280×800 | `store/screenshots/1-card-list.png` | From the demo recording |
 | Screenshot 2: Expired filter | 1280×800 | `store/screenshots/2-cardholder-filter.png` | From the demo recording |
 | Screenshot 3: card details | 1280×800 | `store/screenshots/3-card-details.png` | From the demo recording |
-| Small promo tile | 440×280 | — | To make |
+| Small promo tile | 440×280 | `store/promo-tile-440x280.png` | Ready |
 | Marquee promo tile | 1400×560 | — | Optional |
 
 All screenshots use the demo data (John and Jane Doe, `.example` sites, `0000` numbers). Never
@@ -79,9 +83,12 @@ use a capture of a real account.
 
 **Promo video:** https://youtu.be/QBBEk2fUd-I
 
+**Official URL:** None (it needs a site verified in Google Search Console)
+
 **Homepage URL:** https://github.com/AstroCaleb/virtual-cards-extension
 
-**Support URL:** https://github.com/AstroCaleb/virtual-cards-extension/issues
+**Support URL:** https://github.com/AstroCaleb/virtual-cards-extension#questions-or-problems
+(the README's help section, which offers the email as well as issues, for people without GitHub)
 
 **Contact email** (Account settings, shown publicly on the listing): caleb@calebdudleydesign.com
 
@@ -153,7 +160,7 @@ Certify all three:
 ## Distribution tab
 
 - **Payments:** Free
-- **Visibility:** Public, or Unlisted (installable by link, hidden from store search)
+- **Visibility:** Unlisted (installable by link, hidden from store search). Public is a later decision
 - **Regions:** All regions, or just the United States, where `myaccounts.capitalone.com` accounts are
 
 ## Test instructions for the reviewer
@@ -165,12 +172,13 @@ This extension works only with a Capital One credit card account (myaccounts.cap
 ## Uploading
 
 The store needs `manifest.json` at the root of the zip. The GitHub release zip keeps
-everything inside a folder, so it is not the one to upload. The first upload must not contain
-a `key` field (the manifest has none today). Once the item exists, copy its public key from
-the dashboard's Package tab into `manifest.json` so unpacked installs share the store's ID.
+everything inside a folder, so it is not the one to upload. The first upload could not contain
+a `key` field, so 1.1.0 went up without one. Since 1.1.1 the manifest carries the store's own
+public key (from the dashboard's Package tab), which later uploads may include. It gives
+GitHub installs the store's ID, and `tools/check-manifest.mjs` fails if it ever stops doing so.
 
 ## Version history
 
 | Version | Date | Notes | Status |
 | --- | --- | --- | --- |
-| 1.0.0 | 2026-09-23 | First submission | Draft |
+| 1.1.0 | 2026-09-23 | First submission, with the first-run notice | In review |

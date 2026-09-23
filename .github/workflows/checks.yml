@@ -1,8 +1,9 @@
 name: Checks
 
 # Runs on every pull request, so a failing test or a broken manifest shows up before it
-# can reach a release. Release pull requests are opened by release-please with the
-# built-in token, which GitHub does not let trigger workflows, so those skip this.
+# can reach a release. Release pull requests come from the GitHub Actions bot, so GitHub
+# holds this run until a maintainer clicks "Approve workflows to run". Skipping it is
+# safe: those pull requests only bump the version, and the release job tests again.
 on:
   pull_request:
 
