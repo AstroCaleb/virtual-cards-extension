@@ -1,11 +1,18 @@
 {
   "manifest_version": 3,
   "name": "Virtual Card Helper",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "minimum_chrome_version": "116",
   "description": "Unofficial side panel for your Capital One virtual card numbers. Not affiliated with or endorsed by Capital One.",
-  "permissions": ["sidePanel", "tabs", "scripting", "storage"],
-  "host_permissions": ["https://myaccounts.capitalone.com/*"],
+  "permissions": [
+    "sidePanel",
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://myaccounts.capitalone.com/*"
+  ],
   "background": {
     "service_worker": "service-worker.js"
   },
@@ -25,13 +32,23 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://myaccounts.capitalone.com/*"],
-      "js": ["src/config.js", "src/c1-api.js", "content/bridge.js"],
+      "matches": [
+        "https://myaccounts.capitalone.com/*"
+      ],
+      "js": [
+        "src/config.js",
+        "src/c1-api.js",
+        "content/bridge.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://myaccounts.capitalone.com/*"],
-      "js": ["content/capture.js"],
+      "matches": [
+        "https://myaccounts.capitalone.com/*"
+      ],
+      "js": [
+        "content/capture.js"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }
