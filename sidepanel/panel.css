@@ -304,6 +304,53 @@ button.danger.armed:hover:not(:disabled) {
   margin: 0 0 8px;
 }
 
+/* The first-run notice. While it shows, everything after it is hidden, so nothing on
+   screen can reach Capital One before you have agreed. */
+.notice:not([hidden]) ~ * {
+  display: none !important;
+}
+
+.notice {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--surface);
+}
+
+.notice-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.notice p {
+  margin: 0 0 10px;
+}
+
+.notice-list {
+  margin: 0 0 14px;
+  padding-left: 18px;
+}
+
+.notice-list li + li {
+  margin-top: 6px;
+}
+
+.notice .notice-foot {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.notice a {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.notice a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .status {
   margin: 0 0 10px;
   color: var(--muted);

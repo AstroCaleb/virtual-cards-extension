@@ -5,6 +5,9 @@ const CAPITAL_ONE_HOME = 'https://myaccounts.capitalone.com/accountSummary';
 const ACCOUNTS_KEY = 'accounts';
 const STATUS_FILTER_KEY = 'statusFilter';
 const AUTO_OPEN_KEY = 'autoOpen';
+const NOTICE_KEY = 'noticeAccepted';
+// Raise this when what the panel does with your data changes, so the notice asks again.
+const NOTICE_VERSION = 1;
 const TAB_READY_TIMEOUT_MS = 20000;
 
 // The values Capital One's own Status filter sends. [] means every state.
@@ -87,6 +90,8 @@ const els = {
   suggestedTitle: document.getElementById('suggested-title'),
   suggestedCards: document.getElementById('suggested-cards'),
   suggestedTemplate: document.getElementById('suggested-template'),
+  notice: document.getElementById('notice'),
+  noticeAccept: document.getElementById('notice-accept'),
 };
 
 let accounts = {};
@@ -1054,7 +1059,20 @@ function clearCaptured() {
   for (const el of [els.capturedNumber, els.capturedExpiry, els.capturedCvv]) el.textContent = '';
 }
 
+// Nothing reaches Capital One, and no Capital One tab is opened, until you have read what
+// the panel does and agreed. Stored as a version, so a change in data handling asks again.
+async function awaitNotice() {
+  const { [NOTICE_KEY]: agreed = 0 } = await chrome.storage.local.get(NOTICE_KEY);
+  if (agreed >= NOTICE_VERSION) return;
+  els.notice.hidden = false;
+  await new Promise(resolve => els.noticeAccept.addEventListener('click', resolve, { once: true }));
+  await chrome.storage.local.set({ [NOTICE_KEY]: NOTICE_VERSION });
+  els.notice.hidden = true;
+}
+
 async function init() {
+  await awaitNotice();
+
   const prefs = await chrome.storage.local.get([STATUS_FILTER_KEY, AUTO_OPEN_KEY]);
   if (prefs[STATUS_FILTER_KEY] in STATUS_FILTERS) els.statusFilter.value = prefs[STATUS_FILTER_KEY];
   autoOpen = prefs[AUTO_OPEN_KEY] !== false; // on unless turned off

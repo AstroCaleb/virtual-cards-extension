@@ -113,7 +113,7 @@ Injects the extension's own bundled content script (src/config.js, src/c1-api.js
 `storage`
 
 ```
-Saves, in chrome.storage.local only: the nicknames the user gives their accounts, Capital One's account reference from the page URL, the user's status filter choice, and one on/off setting for opening Capital One automatically. No card numbers are stored.
+Saves, in chrome.storage.local only: the nicknames the user gives their accounts, Capital One's account reference from the page URL, the user's status filter choice, one on/off setting for opening Capital One automatically, and that the user agreed to the first-run notice. No card numbers are stored.
 ```
 
 Host permission `https://myaccounts.capitalone.com/*`
