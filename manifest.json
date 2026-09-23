@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Virtual Card Helper",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "minimum_chrome_version": "116",
   "description": "Unofficial side panel for your Capital One virtual card numbers. Not affiliated with or endorsed by Capital One.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvOnLNsj06EPMoeFdRsnV+FQR+EPA3LlsLq2TD+xI4ILXkRhJPOgTUI+I69hi2+es+z6GDhrlpvmph+jnicwiVR0tw01pGLPXzj4FyoLteoqedkTWhRaaDTjmf9t2LQ49k2ynscXE46+Ubq9QktMvxm7cE2BTKYnZUy+VovWdtNgpDWONKGFOO7K+Cg55CDgmEkukf+JGKbsjDbvDn071za6NxA2HsUVi05BMGYj/IZ9gUxcEqNdjni4FyWm0kuUOMSZWO4MeuoCaWmt6yArESOfi2pCHZB7lHoF8Shi1JNvIF7NK4DI9HPvPJAXaUONthxLds1mXaeYU4p1yT+1b5wIDAQAB",

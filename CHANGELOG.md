@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.1.0...v1.1.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* give GitHub installs the same extension ID as the Chrome Web Store ([#4](https://github.com/AstroCaleb/virtual-cards-extension/issues/4)) ([9544aab](https://github.com/AstroCaleb/virtual-cards-extension/commit/9544aabcd28efa2f8f53dfb75136c411ec23ee09))
+
 ## [1.1.0](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.0.0...v1.1.0) (2026-09-23)
 
 
