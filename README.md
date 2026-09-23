@@ -97,7 +97,10 @@ Capital One's API has two halves. Listing, searching, renaming, locking and dele
 
 ```bash
 node tools/capture.test.mjs
+node tools/check-manifest.mjs
 ```
+
+Both also run on every pull request.
 
 After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension **and** the Capital One tab.
 
