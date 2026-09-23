@@ -172,9 +172,10 @@ This extension works only with a Capital One credit card account (myaccounts.cap
 ## Uploading
 
 The store needs `manifest.json` at the root of the zip. The GitHub release zip keeps
-everything inside a folder, so it is not the one to upload. The first upload must not contain
-a `key` field (the manifest has none today). Once the item exists, copy its public key from
-the dashboard's Package tab into `manifest.json` so unpacked installs share the store's ID.
+everything inside a folder, so it is not the one to upload. The first upload could not contain
+a `key` field, so 1.1.0 went up without one. Since 1.1.1 the manifest carries the store's own
+public key (from the dashboard's Package tab), which later uploads may include. It gives
+GitHub installs the store's ID, and `tools/check-manifest.mjs` fails if it ever stops doing so.
 
 ## Version history
 
