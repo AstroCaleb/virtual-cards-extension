@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0](https://github.com/AstroCaleb/virtual-cards-extension/compare/v0.1.0...v1.0.0) (2026-09-23)
+## [1.0.0](https://github.com/AstroCaleb/virtual-cards-extension/releases/tag/v1.0.0) (2026-09-23)
 
 
 ### Features
