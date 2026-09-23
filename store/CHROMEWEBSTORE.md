@@ -55,7 +55,8 @@ GOOD TO KNOW
 
 "Capital One" is a trademark of Capital One Financial Corporation, used here only to say which accounts this extension works with.
 
-Source code, privacy policy and support: https://github.com/AstroCaleb/virtual-cards-extension
+Questions or problems: caleb@calebdudleydesign.com
+Source code and privacy policy: https://github.com/AstroCaleb/virtual-cards-extension
 ```
 
 **Category:** Shopping
@@ -81,6 +82,8 @@ use a capture of a real account.
 **Homepage URL:** https://github.com/AstroCaleb/virtual-cards-extension
 
 **Support URL:** https://github.com/AstroCaleb/virtual-cards-extension/issues
+
+**Contact email** (Account settings, shown publicly on the listing): caleb@calebdudleydesign.com
 
 ## Privacy practices tab
 

@@ -82,7 +82,7 @@ Your nicknames and settings carry over. To hear about new versions, click **Watc
 
 ## Questions or problems
 
-[Open an issue](https://github.com/AstroCaleb/virtual-cards-extension/issues) and I'll do my best to help. **Never post card numbers, or screenshots that show your account.**
+Email me at [caleb@calebdudleydesign.com](mailto:caleb@calebdudleydesign.com), or [open an issue](https://github.com/AstroCaleb/virtual-cards-extension/issues) if you have a GitHub account. I'll do my best to help. **Never send or post card numbers, or screenshots that show your account.**
 
 ## The fine print
 

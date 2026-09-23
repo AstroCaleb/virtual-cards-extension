@@ -44,4 +44,4 @@ If the way the extension handles your data ever changes, I'll update this page a
 
 ## Contact
 
-Questions about privacy go to [the project's issues page](https://github.com/AstroCaleb/virtual-cards-extension/issues). Please never post card numbers or screenshots that show your account.
+Email me at [caleb@calebdudleydesign.com](mailto:caleb@calebdudleydesign.com), or use [the project's issues page](https://github.com/AstroCaleb/virtual-cards-extension/issues) if you have a GitHub account. Please never send or post card numbers, or screenshots that show your account.
