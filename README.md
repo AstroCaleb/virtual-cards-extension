@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > **Virtual Card Helper is not made by, affiliated with, or endorsed by Capital One.** It's a free, independent project from one cardholder to the others. Capital One can't help you with it, so please don't ask them to.
 
-<!-- Demo video: edit this file on github.com and drag virtual-cards-demo.mp4 onto this line. -->
+https://github.com/user-attachments/assets/ef32a812-f45d-4bb9-9959-109d0f09b2bd
 
 ## Why I made this
 
