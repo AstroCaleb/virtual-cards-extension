@@ -9,6 +9,28 @@
 </head>
 
 <body>
+  <section id="notice" class="notice" aria-labelledby="notice-title" hidden>
+    <h1 id="notice-title" class="notice-title">Before you start</h1>
+    <p>
+      <strong>Virtual Card Helper is unofficial.</strong> It isn't made by, affiliated with, or
+      endorsed by Capital One.
+    </p>
+    <ul class="notice-list">
+      <li>It talks only to Capital One, from your own signed-in tab. No other servers, no tracking.</li>
+      <li>It never sees your password or texted codes, and never saves card numbers.</li>
+      <li>
+        To suggest cards for the site you're on, it searches your cards for the first five letters
+        of that site's name. That search goes to Capital One.
+      </li>
+    </ul>
+    <button id="notice-accept" type="button" class="primary">Agree and continue</button>
+    <p class="notice-foot">
+      Nothing is sent to Capital One until you continue.
+      <a href="https://github.com/AstroCaleb/virtual-cards-extension/blob/main/PRIVACY.md" target="_blank"
+        rel="noreferrer">Privacy policy</a>
+    </p>
+  </section>
+
   <header class="bar">
     <label class="field">
       <span class="field-label">Account</span>
@@ -103,7 +125,8 @@
   </div>
 
   <div class="bar">
-    <input id="search" type="search" placeholder="Search cards by name" autocomplete="off" />
+    <input id="search" type="search" placeholder="Search cards by name" aria-label="Search cards by name"
+      autocomplete="off" />
   </div>
 
   <p id="status" class="status" role="status" aria-live="polite"></p>

@@ -55,7 +55,8 @@ GOOD TO KNOW
 
 "Capital One" is a trademark of Capital One Financial Corporation, used here only to say which accounts this extension works with.
 
-Source code, privacy policy and support: https://github.com/AstroCaleb/virtual-cards-extension
+Questions or problems: caleb@calebdudleydesign.com
+Source code and privacy policy: https://github.com/AstroCaleb/virtual-cards-extension
 ```
 
 **Category:** Shopping
@@ -81,6 +82,8 @@ use a capture of a real account.
 **Homepage URL:** https://github.com/AstroCaleb/virtual-cards-extension
 
 **Support URL:** https://github.com/AstroCaleb/virtual-cards-extension/issues
+
+**Contact email** (Account settings, shown publicly on the listing): caleb@calebdudleydesign.com
 
 ## Privacy practices tab
 
@@ -113,7 +116,7 @@ Injects the extension's own bundled content script (src/config.js, src/c1-api.js
 `storage`
 
 ```
-Saves, in chrome.storage.local only: the nicknames the user gives their accounts, Capital One's account reference from the page URL, the user's status filter choice, and one on/off setting for opening Capital One automatically. No card numbers are stored.
+Saves, in chrome.storage.local only: the nicknames the user gives their accounts, Capital One's account reference from the page URL, the user's status filter choice, one on/off setting for opening Capital One automatically, and that the user agreed to the first-run notice. No card numbers are stored.
 ```
 
 Host permission `https://myaccounts.capitalone.com/*`

@@ -1,0 +1,27 @@
+name: Checks
+
+# Runs on every pull request, so a failing test or a broken manifest shows up before it
+# can reach a release. Release pull requests are opened by release-please with the
+# built-in token, which GitHub does not let trigger workflows, so those skip this.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Tests and manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+
+      - name: Run tests
+        run: node tools/capture.test.mjs
+
+      - name: Check JavaScript syntax
+        run: git ls-files '*.js' '*.mjs' | xargs -n 1 node --check
+
+      - name: Check the manifest
+        run: node tools/check-manifest.mjs

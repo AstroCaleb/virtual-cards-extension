@@ -33,7 +33,7 @@ Virtual Card Helper isn't in the Chrome Web Store yet, so Chrome needs a setting
 5. Click **Load unpacked** and choose the `virtual-cards-extension` folder.
 6. Click the puzzle-piece icon in Chrome's toolbar, then the pin next to **Virtual Card Helper**.
 
-Now click the Virtual Card Helper icon to open the panel. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
+Now click the Virtual Card Helper icon to open the panel. The first time, it explains what it does with your data. Click **Agree and continue**. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
 
 ## Using it
 
@@ -48,7 +48,7 @@ This handles credit card numbers, so here is exactly what it does:
 - **It only talks to Capital One.** Every request goes to `myaccounts.capitalone.com`, from your own signed-in tab, the same way their website does. There are no other servers, no analytics and no tracking. I don't run a server at all.
 - **It never sees your password or your texted codes.** You type those into Capital One's own pages.
 - **It never saves card numbers.** A number you show is kept in the panel for 3 minutes, then it's gone. It is never written to your computer.
-- **What it does save, on your computer only:** the nicknames you give your accounts, Capital One's internal ID for each account (not a card number), your filter choice, and one setting. Removing the extension deletes all of it.
+- **What it does save, on your computer only:** the nicknames you give your accounts, Capital One's internal ID for each account (not a card number), your filter choice, and a couple of settings. Removing the extension deletes all of it.
 - **The one thing to know about:** to suggest cards for the site you're on, it searches your cards for the first five letters of that site's name. On amazon.com, it searches for "amazo". That search goes to Capital One, and only while the panel is open.
 
 All of the code is in this repository, and it's short enough to read. The [privacy policy](PRIVACY.md) has the full details.
@@ -82,7 +82,7 @@ Your nicknames and settings carry over. To hear about new versions, click **Watc
 
 ## Questions or problems
 
-[Open an issue](https://github.com/AstroCaleb/virtual-cards-extension/issues) and I'll do my best to help. **Never post card numbers, or screenshots that show your account.**
+Email me at [caleb@calebdudleydesign.com](mailto:caleb@calebdudleydesign.com), or [open an issue](https://github.com/AstroCaleb/virtual-cards-extension/issues) if you have a GitHub account. I'll do my best to help. **Never send or post card numbers, or screenshots that show your account.**
 
 ## The fine print
 
@@ -97,7 +97,10 @@ Capital One's API has two halves. Listing, searching, renaming, locking and dele
 
 ```bash
 node tools/capture.test.mjs
+node tools/check-manifest.mjs
 ```
+
+Both also run on every pull request.
 
 After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension **and** the Capital One tab.
 

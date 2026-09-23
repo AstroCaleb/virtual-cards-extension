@@ -24,6 +24,7 @@ Virtual Card Helper talks only to Capital One, from your own signed-in browser t
 - Capital One's internal reference for each account, taken from the page address (not a card number)
 - your status filter choice
 - whether to open Capital One automatically when the panel needs it
+- that you agreed to the notice shown the first time you open the panel
 
 **Never handled.** Your Capital One password and one-time codes. You sign in and verify on Capital One's own pages, and the extension has no access to either.
 
@@ -39,8 +40,8 @@ Full card details last at most 3 minutes, in memory only. Saved settings stay un
 
 ## Changes
 
-If the way the extension handles your data ever changes, I'll update this page and describe the change in the release notes before it ships. Every past version of this page is in the repository's history.
+If the way the extension handles your data ever changes, I'll update this page and describe the change in the release notes before it ships, and the panel will show its notice again so you can agree to the change. Every past version of this page is in the repository's history.
 
 ## Contact
 
-Questions about privacy go to [the project's issues page](https://github.com/AstroCaleb/virtual-cards-extension/issues). Please never post card numbers or screenshots that show your account.
+Email me at [caleb@calebdudleydesign.com](mailto:caleb@calebdudleydesign.com), or use [the project's issues page](https://github.com/AstroCaleb/virtual-cards-extension/issues) if you have a GitHub account. Please never send or post card numbers, or screenshots that show your account.
