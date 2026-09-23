@@ -51,7 +51,7 @@ This handles credit card numbers, so here is exactly what it does:
 - **What it does save, on your computer only:** the nicknames you give your accounts, Capital One's internal ID for each account (not a card number), your filter choice, and one setting. Removing the extension deletes all of it.
 - **The one thing to know about:** to suggest cards for the site you're on, it searches your cards for the first five letters of that site's name. On amazon.com, it searches for "amazo". That search goes to Capital One, and only while the panel is open.
 
-All of the code is in this repository, and it's short enough to read.
+All of the code is in this repository, and it's short enough to read. The [privacy policy](PRIVACY.md) has the full details.
 
 <details>
 <summary><strong>Why Virtual Card Helper asks for each permission</strong></summary>
