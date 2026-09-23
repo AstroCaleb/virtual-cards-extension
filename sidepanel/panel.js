@@ -586,13 +586,19 @@ async function revealCard(card, arid) {
   );
 }
 
+// Capital One itself or one of its subdomains, and nothing that merely ends in the same
+// letters, which notcapitalone.com would.
+function isCapitalOne(hostname) {
+  return hostname === 'capitalone.com' || hostname.endsWith('.capitalone.com');
+}
+
 // The site in the frontmost tab, as a hostname and a search term: www.newegg.com gives
 // "newegg.com" and "newegg".
 async function activeSite() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   try {
     const { hostname } = new URL(tab?.url ?? '');
-    if (!hostname || hostname.endsWith('capitalone.com')) return { host: '', term: '' };
+    if (!hostname || isCapitalOne(hostname)) return { host: '', term: '' };
     const host = hostname.replace(/^www\./, '');
     const labels = host.split('.');
     // Second-to-last label, unless that is a short one like the "co" of co.uk.
@@ -963,7 +969,7 @@ async function suggestedName() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   try {
     const { hostname } = new URL(tab?.url ?? '');
-    if (hostname && !hostname.endsWith('capitalone.com')) return hostname.replace(/^www\./, '');
+    if (hostname && !isCapitalOne(hostname)) return hostname.replace(/^www\./, '');
   } catch {
     // Chrome pages and blank tabs have no usable URL.
   }
