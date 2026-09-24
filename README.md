@@ -13,7 +13,7 @@ Capital One is shutting down Eno, its Chrome extension, on September 30, 2026. I
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
-It's for Chrome only. If you use Firefox, you may not need it: as of September 2026, Eno's Firefox listing doesn't mention a shutdown, and Capital One updated it in July.
+It works in Chrome and Microsoft Edge. If you use Firefox, you may not need it: as of September 2026, Eno's Firefox listing doesn't mention a shutdown, and Capital One updated it in July.
 
 ## What it does
 
@@ -25,6 +25,7 @@ It's for Chrome only. If you use Firefox, you may not need it: as of September 2
 ## Install
 
 1. Open **[Virtual Card Helper in the Chrome Web Store](https://chromewebstore.google.com/detail/virtual-card-helper/aclghbjbgimapkibeejappfhclocdjcc)** and click **Add to Chrome**. Chrome will say the extension can "read your browsing history". That's Chrome's wording for reading the address of the tab you're on, and [here's why it asks](#your-privacy).
+   - Using Microsoft Edge? Open the same link. Edge first asks to allow extensions from other stores. Click **Allow**, then **Add to Chrome**.
 2. Click the puzzle-piece icon in Chrome's toolbar, then the pin next to **Virtual Card Helper**.
 
 Now click the Virtual Card Helper icon to open the panel. The first time, it explains what it does with your data. Click **Agree and continue**. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
@@ -86,7 +87,7 @@ Your nicknames and settings carry over. To hear about new versions, click **Watc
 
 ## Good to know
 
-- It's built and tested in Chrome 116 or newer, on a computer. There's no Firefox version.
+- It works in Chrome 116 or newer and in Microsoft Edge, on a computer. There's no Firefox version.
 - If Capital One changes its website, the extension may stop working until I update it.
 - It can't fill in checkout forms. You copy and paste.
 
