@@ -232,5 +232,5 @@ echo "GCP_WORKLOAD_IDENTITY_PROVIDER=projects/${PROJECT_NUMBER}/locations/global
 
 | Version | Date | Notes | Status |
 | --- | --- | --- | --- |
-| 1.1.1 | — | Carries the store's own key, so GitHub installs share its ID | To upload |
+| 1.1.1 | 2026-09-24 | Carries the store's own key, so GitHub installs share its ID | Published 2026-09-24 |
 | 1.1.0 | 2026-09-23 | First submission, with the first-run notice | Published 2026-09-24 |
