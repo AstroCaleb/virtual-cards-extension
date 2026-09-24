@@ -22,9 +22,17 @@ Caleb
 - Creates new cards and shows card numbers, with copy buttons
 - Locks, unlocks, renames and deletes cards
 
-## Install (about two minutes)
+## Install
 
-Virtual Card Helper isn't in the Chrome Web Store yet, so Chrome needs a setting called **Developer mode** to install it. The name sounds more serious than it is. It just lets you install an extension from a folder.
+1. Open **[Virtual Card Helper in the Chrome Web Store](https://chromewebstore.google.com/detail/virtual-card-helper/aclghbjbgimapkibeejappfhclocdjcc)** and click **Add to Chrome**. Chrome will say the extension can "read your browsing history". That's Chrome's wording for reading the address of the tab you're on, and [here's why it asks](#your-privacy).
+2. Click the puzzle-piece icon in Chrome's toolbar, then the pin next to **Virtual Card Helper**.
+
+Now click the Virtual Card Helper icon to open the panel. The first time, it explains what it does with your data. Click **Agree and continue**. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
+
+<details>
+<summary><strong>Or install it from GitHub instead</strong></summary>
+
+If you'd rather not use the Chrome Web Store, Chrome can install the extension from a folder. That needs a setting called **Developer mode**, which sounds more serious than it is. Use one install or the other, not both.
 
 1. **Download [virtual-cards-extension.zip](https://github.com/AstroCaleb/virtual-cards-extension/releases/latest/download/virtual-cards-extension.zip)** and unzip it.
 2. **Move the `virtual-cards-extension` folder somewhere it can stay**, like your Documents folder. Chrome runs the extension from that folder, so don't delete it.
@@ -33,7 +41,7 @@ Virtual Card Helper isn't in the Chrome Web Store yet, so Chrome needs a setting
 5. Click **Load unpacked** and choose the `virtual-cards-extension` folder.
 6. Click the puzzle-piece icon in Chrome's toolbar, then the pin next to **Virtual Card Helper**.
 
-Now click the Virtual Card Helper icon to open the panel. The first time, it explains what it does with your data. Click **Agree and continue**. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
+</details>
 
 ## Using it
 
@@ -66,7 +74,9 @@ All of the code is in this repository, and it's short enough to read. The [priva
 
 ## Updating
 
-The extension doesn't update itself. When a new version comes out:
+**From the Chrome Web Store:** Chrome keeps it up to date for you.
+
+**From GitHub:** it doesn't update itself. When a new version comes out:
 
 1. Download [virtual-cards-extension.zip](https://github.com/AstroCaleb/virtual-cards-extension/releases/latest/download/virtual-cards-extension.zip) again and unzip it.
 2. Replace your old `virtual-cards-extension` folder with the new one. Keep it in the same place with the same name.
