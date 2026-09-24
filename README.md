@@ -9,11 +9,11 @@ https://github.com/user-attachments/assets/ef32a812-f45d-4bb9-9959-109d0f09b2bd
 
 ## Why I made this
 
-Capital One is shutting down Eno, its browser extension, on September 30, 2026. I used it constantly: a fresh virtual card number for every site, always one click away. I wasn't ready to give that up, and I know I'm not the only one. So I built my own, and I'm giving it away.
+Capital One is shutting down Eno, its Chrome extension, on September 30, 2026. I used it constantly: a fresh virtual card number for every site, always one click away. I wasn't ready to give that up, and I know I'm not the only one. So I built my own, and I'm giving it away.
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
-Caleb
+It's for Chrome only. If you use Firefox, you may not need it: as of September 2026, Eno's Firefox listing doesn't mention a shutdown, and Capital One updated it in July.
 
 ## What it does
 
@@ -86,7 +86,7 @@ Your nicknames and settings carry over. To hear about new versions, click **Watc
 
 ## Good to know
 
-- It's built and tested in Chrome 116 or newer, on a computer.
+- It's built and tested in Chrome 116 or newer, on a computer. There's no Firefox version.
 - If Capital One changes its website, the extension may stop working until I update it.
 - It can't fill in checkout forms. You copy and paste.
 
