@@ -18,8 +18,13 @@ const POLL_LIMIT = 24;
 const { CWS_TOKEN: token, CWS_PUBLISHER_ID: publisher } = process.env;
 const [command, zipPath] = process.argv.slice(2);
 
+// Everything printed here can carry text from the API. A line break in it would start a
+// new log line, which GitHub Actions could read as a workflow command.
+const oneLine = value => String(value).replace(/[\r\n]+/g, ' ');
+const log = message => console.log(oneLine(message));
+
 function fail(message) {
-  console.error(`✗ ${message}`);
+  console.error(`✗ ${oneLine(message)}`);
   process.exit(1);
 }
 
@@ -47,10 +52,10 @@ function revision(label, status) {
 
 async function status() {
   const current = await fetchStatus();
-  console.log(revision('Published', current.publishedItemRevisionStatus));
-  console.log(revision('Submitted', current.submittedItemRevisionStatus));
-  if (current.warned) console.log('⚠ Warned for a policy violation. Check the Developer Dashboard.');
-  if (current.takenDown) console.log('⚠ Taken down for a policy violation. Check the Developer Dashboard.');
+  log(revision('Published', current.publishedItemRevisionStatus));
+  log(revision('Submitted', current.submittedItemRevisionStatus));
+  if (current.warned) log('⚠ Warned for a policy violation. Check the Developer Dashboard.');
+  if (current.takenDown) log('⚠ Taken down for a policy violation. Check the Developer Dashboard.');
 }
 
 async function publish() {
@@ -74,7 +79,8 @@ async function publish() {
   if (upload.uploadState !== 'SUCCEEDED') fail(`Upload ended ${upload.uploadState}: ${JSON.stringify(upload)}`);
 
   const submitted = await call('POST', `v2/${item}:publish`);
-  console.log(`✓ Uploaded${upload.crxVersion ? ` ${upload.crxVersion}` : ''} and submitted for review: ${submitted.state}`);
+  const version = upload.crxVersion ? ` ${upload.crxVersion}` : '';
+  log(`✓ Uploaded${version} and submitted for review: ${submitted.state}`);
 }
 
 if (command === 'status') await status();
