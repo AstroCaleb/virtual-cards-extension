@@ -1,8 +1,9 @@
 name: Release
 
 # Every push to main updates the release pull request. Merging that pull request pushes
-# to main again, and that run tags the version, creates the GitHub Release and attaches
-# the zip. Only commits starting with fix: or feat: count towards a release.
+# to main again, and that run tags the version, creates the GitHub Release, attaches the
+# zip, and sends the same version to the Chrome Web Store for review. Only commits
+# starting with fix: or feat: count towards a release.
 on:
   push:
     branches:
@@ -20,6 +21,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
@@ -54,3 +58,39 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag_name }}
         run: gh release upload "$TAG" dist/virtual-cards-extension.zip
+
+  # Signs in to Google without a stored key: Google trusts this repository's main branch
+  # directly (workload identity federation), so there is no secret that could leak and
+  # let someone else publish an update. Skipped until the repository variables are set.
+  store:
+    name: Chrome Web Store
+    needs: release
+    if: needs.release.outputs.release_created == 'true' && vars.CWS_PUBLISHER_ID != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout the release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+        with:
+          ref: ${{ needs.release.outputs.tag_name }}
+
+      # The store wants manifest.json at the root of the zip, unlike the GitHub download.
+      - name: Zip the extension for the store
+        run: zip -r -X store.zip manifest.json service-worker.js content sidepanel src icons LICENSE
+
+      - name: Sign in to Google
+        id: google
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # 3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+
+      - name: Upload and submit for review
+        env:
+          CWS_TOKEN: ${{ steps.google.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+        run: node tools/chrome-web-store.mjs publish store.zip
