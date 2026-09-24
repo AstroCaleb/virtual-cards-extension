@@ -3,11 +3,9 @@
 Everything the Developer Dashboard asks for, ready to paste. Keep this in step with
 `manifest.json` and [PRIVACY.md](../PRIVACY.md) whenever permissions or data handling change.
 
-> Last updated: 2026-09-23
-
 **Item ID:** `aclghbjbgimapkibeejappfhclocdjcc`
 
-**Listing:** https://chromewebstore.google.com/detail/aclghbjbgimapkibeejappfhclocdjcc (unlisted; opens once published)
+**Listing:** https://chromewebstore.google.com/detail/virtual-card-helper/aclghbjbgimapkibeejappfhclocdjcc
 
 ## Store listing tab
 
