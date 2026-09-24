@@ -114,6 +114,6 @@ Both also run on every pull request.
 
 After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension **and** the Capital One tab.
 
-Releases are automated. Commits to `main` that start with `fix:` or `feat:` open a release pull request, and merging it publishes a new version.
+Releases are automated. Commits to `main` that start with `fix:` or `feat:` open a release pull request, and merging it publishes the new version on GitHub and submits it to the Chrome Web Store for review.
 
 </details>

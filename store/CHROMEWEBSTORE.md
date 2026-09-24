@@ -177,6 +177,57 @@ a `key` field, so 1.1.0 went up without one. Since 1.1.1 the manifest carries th
 public key (from the dashboard's Package tab), which later uploads may include. It gives
 GitHub installs the store's ID, and `tools/check-manifest.mjs` fails if it ever stops doing so.
 
+### Automated uploads
+
+Merging a release pull request runs the **Chrome Web Store** job in
+`.github/workflows/release.yml`. It zips the release with `manifest.json` at the root, uploads
+it, and submits it for review, using `tools/chrome-web-store.mjs`. If a version is already in
+review it stops without uploading, so that review keeps its place in the queue. The
+**Chrome Web Store status** workflow (Actions tab → Run workflow, on `main`) prints what's
+published and what's in review.
+
+It signs in to Google through workload identity federation. There is no key or token
+stored anywhere: Google hands out a short-lived token only to a workflow running on this
+repository's `main` branch.
+
+One-time setup, done in the Google Cloud Console:
+
+1. Create a project (any name), and open **Cloud Shell** in it.
+2. Paste the script below. It enables the APIs, creates the `chrome-web-store` service
+   account, and lets only this repository's `main` branch act as it.
+3. In the Developer Dashboard, go to **Account**, add the service account email it prints,
+   and copy the **Publisher ID**.
+4. In GitHub, go to Settings → Secrets and variables → Actions → **Variables**, and add
+   `CWS_PUBLISHER_ID`, `GCP_SERVICE_ACCOUNT`, and `GCP_WORKLOAD_IDENTITY_PROVIDER` (all three
+   are identifiers, not secrets). The store job is skipped until they exist.
+5. Run **Chrome Web Store status** to confirm the sign-in works.
+
+```bash
+set -euo pipefail
+PROJECT_ID="$(gcloud config get-value project)"
+PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+REPO_ID=1384010019 # github.com/AstroCaleb/virtual-cards-extension; survives a rename
+SA="chrome-web-store@${PROJECT_ID}.iam.gserviceaccount.com"
+
+gcloud services enable chromewebstore.googleapis.com iam.googleapis.com \
+  iamcredentials.googleapis.com sts.googleapis.com
+gcloud iam service-accounts create chrome-web-store --display-name="Chrome Web Store uploads"
+gcloud iam workload-identity-pools create github --location=global --display-name="GitHub Actions"
+gcloud iam workload-identity-pools providers create-oidc virtual-cards-extension \
+  --location=global --workload-identity-pool=github --display-name="virtual-cards-extension" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository_id=assertion.repository_id,attribute.ref=assertion.ref" \
+  --attribute-condition="assertion.repository_id == '${REPO_ID}' && assertion.ref == 'refs/heads/main'"
+sleep 10 # a new service account takes a moment to be usable in policy bindings
+gcloud iam service-accounts add-iam-policy-binding "$SA" --role=roles/iam.workloadIdentityUser \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/attribute.repository_id/${REPO_ID}"
+gcloud iam service-accounts add-iam-policy-binding "$SA" --role=roles/iam.serviceAccountTokenCreator \
+  --member="serviceAccount:${SA}"
+
+echo "GCP_SERVICE_ACCOUNT=${SA}"
+echo "GCP_WORKLOAD_IDENTITY_PROVIDER=projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/providers/virtual-cards-extension"
+```
+
 ## Version history
 
 | Version | Date | Notes | Status |
