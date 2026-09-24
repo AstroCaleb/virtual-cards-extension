@@ -181,4 +181,5 @@ GitHub installs the store's ID, and `tools/check-manifest.mjs` fails if it ever 
 
 | Version | Date | Notes | Status |
 | --- | --- | --- | --- |
-| 1.1.0 | 2026-09-23 | First submission, with the first-run notice | In review |
+| 1.1.1 | — | Carries the store's own key, so GitHub installs share its ID | To upload |
+| 1.1.0 | 2026-09-23 | First submission, with the first-run notice | Published 2026-09-24 |
