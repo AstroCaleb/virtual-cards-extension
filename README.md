@@ -1,7 +1,7 @@
 # Virtual Card Helper
 
 [![Chrome Web Store version](https://img.shields.io/chrome-web-store/v/aclghbjbgimapkibeejappfhclocdjcc?label=Chrome%20Web%20Store&color=0a5ed7)](https://chromewebstore.google.com/detail/virtual-card-helper/aclghbjbgimapkibeejappfhclocdjcc)
-[![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-0a5ed7?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/astro_caleb)
+[![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-3c5e3a?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/astro_caleb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-5c6370)](LICENSE)
 
 **Your Capital One virtual cards, in a Chrome side panel.**
