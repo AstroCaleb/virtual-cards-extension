@@ -1,0 +1,40 @@
+name: Privacy
+
+# Checks every pull request against main's copy of tools/check-privacy.mjs. Under a plain
+# pull_request trigger, a pull request from a fork runs its own copy of the workflows and
+# scripts, so it could loosen the rules or skip them. pull_request_target always runs
+# main's workflow, so this check stays as main defines it.
+#
+# pull_request_target has more access than pull_request, so this job is careful with it:
+# it reads the pull request's files only as text and never runs, installs or imports
+# anything from them. It has read-only permissions and no secrets, and neither checkout
+# leaves a token on disk.
+on:
+  pull_request_target:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy:
+    name: Privacy check (main's rules)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main's rules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+        with:
+          path: main
+          persist-credentials: false
+
+      # Untrusted files from a fork. Never add a step that runs, installs, builds or sources
+      # anything in pull-request/. The only thing allowed to touch it is main's checker below.
+      - name: Checkout the pull request's files
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pull-request
+          persist-credentials: false
+
+      - name: Check the pull request with main's rules
+        run: node main/tools/check-privacy.mjs pull-request --base main
