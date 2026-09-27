@@ -26,6 +26,8 @@ jobs:
           path: main
           persist-credentials: false
 
+      # Untrusted files from a fork. Never add a step that runs, installs, builds or sources
+      # anything in pull-request/. The only thing allowed to touch it is main's checker below.
       - name: Checkout the pull request's files
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
