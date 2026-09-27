@@ -26,3 +26,11 @@ jobs:
 
       - name: Check the manifest
         run: node tools/check-manifest.mjs
+
+      # This pull request's copy of the privacy rules, so a change to them can be tested
+      # here. The Privacy workflow runs main's copy, which a pull request can't edit.
+      - name: Check privacy rules
+        run: node tools/check-privacy.mjs
+
+      - name: Test the privacy check
+        run: node tools/check-privacy.test.mjs
