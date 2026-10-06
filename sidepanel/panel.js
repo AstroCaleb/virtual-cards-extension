@@ -1184,6 +1184,10 @@ async function init() {
     const wasWaiting = Boolean(waitTimer);
     stopWaiting();
     if (wasWaiting || needsData) {
+      // After sign-in Capital One passes through several addresses before it settles, and a
+      // call made mid-way is cut off ("Could not reach Capital One"). So wait for the page to
+      // finish loading. If it moves on again first, that next address change lands here too.
+      if (tab.status !== 'complete' && !(await waitForTabReady(tabId))) return;
       await reload();
       // Cards loaded, so the sign-in really did take. Hand the tab back.
       if (!needsData) await returnToPreviousTab();
