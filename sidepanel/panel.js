@@ -191,9 +191,15 @@ async function ensureCapitalOneTab() {
   if (signedOut) {
     autoOpenedTabId = signedOut.id;
     await rememberCurrentTab();
-    const signingIn = signedOut.url?.startsWith('https://verified.capitalone.com/');
-    await showTab(signedOut, signingIn ? undefined : CAPITAL_ONE_HOME);
-    return null;
+    if (signedOut.url?.startsWith('https://verified.capitalone.com/')) {
+      await showTab(signedOut);
+      return null;
+    }
+    // Wait for it to land before any call goes to it: mid-redirect it can't answer, which
+    // reads as "the tab did not answer". It lands back on the servicing host only if the
+    // session turns out to be fine after all.
+    await showTab(signedOut, CAPITAL_ONE_HOME);
+    return waitForTabReady(signedOut.id);
   }
   if (autoOpenedTabId !== null) return null;
 
