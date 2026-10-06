@@ -2,6 +2,9 @@
 // script running on myaccounts.capitalone.com, which is the only place with the session.
 const CAPITAL_ONE_MATCH = 'https://myaccounts.capitalone.com/*';
 const CAPITAL_ONE_HOME = 'https://myaccounts.capitalone.com/accountSummary';
+// Where Capital One leaves a tab once your session ends: its signed-out page ("Log Back
+// In"), or its sign-in site. Neither can make API calls, but either can take you to sign in.
+const CAPITAL_ONE_SIGNED_OUT = ['https://www.capitalone.com/sign-out*', 'https://verified.capitalone.com/*'];
 const ACCOUNTS_KEY = 'accounts';
 const STATUS_FILTER_KEY = 'statusFilter';
 const AUTO_OPEN_KEY = 'autoOpen';
@@ -58,6 +61,8 @@ const SUGGEST_DEBOUNCE_MS = 400;
 const CAPTURE_TTL_MS = 3 * 60 * 1000;
 // Signing in takes a while, so watch for a usable tab rather than making you press Refresh.
 const WAIT_POLL_MS = 2000;
+// How long to give Capital One before retrying the account and cardholder lookups once.
+const LOOKUP_RETRY_MS = 5000;
 const WAIT_TIMEOUT_MS = 3 * 60 * 1000;
 const COPY_LABELS = { number: 'Card number', expiry: 'Expiry', cvv: 'Security code' };
 
@@ -99,6 +104,7 @@ let accountOverrides = {}; // only what the user typed; everything else comes fr
 let cardholders = [];
 let cardholderById = new Map();
 let lookupErrors = []; // surfaced in the status line so failures are not silent
+let lookupRetried = false; // one quiet retry per run of failed lookups
 let cards = [];
 let searchTimer;
 let armedDelete = null; // the one card whose Delete is waiting for a confirming click
@@ -112,6 +118,7 @@ let waitTimer = null;
 let autoOpen = true;
 let autoOpenedTabId = null; // one unprompted tab is enough; never pile them up
 let returnToTab = null; // where you were before any detour over to Capital One
+let signInShown = false; // the signed-out tab is already in front; once per sign-in
 let suggestTimer;
 const suggestionCache = new Map(); // host -> matches, so browsing does not re-query
 
@@ -178,7 +185,11 @@ async function ensureCapitalOneTab() {
     autoOpenedTabId = null;
     return existing;
   }
-  if (!autoOpen || autoOpenedTabId !== null) return null;
+  if (!autoOpen) return null;
+
+  // A tab Capital One already signed out is reused, not joined by a second one. The load
+  // that follows fails, and bringSignInForward puts that tab in front of you.
+  if (autoOpenedTabId !== null || (await findSignedOutTab())) return null;
 
   const created = await chrome.tabs.create({ url: CAPITAL_ONE_HOME, active: false });
   autoOpenedTabId = created.id;
@@ -260,6 +271,7 @@ function reload() {
 }
 
 async function doReload() {
+  signInShown = false;
   // Best effort. If it cannot get a tab, the calls below fail with NO_TAB and the panel
   // falls back to asking you to sign in.
   try {
@@ -274,6 +286,17 @@ async function doReload() {
   // Deliberately not awaited: the list is already on screen, and blocking here would also
   // hold up the hand-back to your previous tab after a sign-in.
   if (!needsData) loadSuggestions().catch(() => {});
+
+  // Right after sign-in, Capital One answers the card list a few seconds before the account
+  // and cardholder lookups, which fail as NETWORK until then. Without them there are no
+  // account names or cardholders, and renaming or locking a card can't work. So try once
+  // more, quietly; if that fails too, the status line already says so.
+  if (!lookupErrors.length) {
+    lookupRetried = false;
+  } else if (!needsData && !lookupRetried && lookupErrors.some(error => error.endsWith(' NETWORK'))) {
+    lookupRetried = true;
+    setTimeout(() => reload().catch(() => {}), LOOKUP_RETRY_MS);
+  }
 }
 
 function currentArid() {
@@ -285,9 +308,49 @@ function currentAccount() {
   return arid ? accounts[arid] : null;
 }
 
+// With more than one Capital One tab open, use the one you're looking at, then the one
+// you used last, rather than whichever Chrome happens to list first. One of them may be
+// signed out. lastAccessed needs Chrome 121; before that, Chrome's order stands.
 async function findCapitalOneTab() {
-  const [tab] = await chrome.tabs.query({ url: CAPITAL_ONE_MATCH });
+  const tabs = await chrome.tabs.query({ url: CAPITAL_ONE_MATCH });
+  const [tab] = tabs.toSorted((a, b) => (b.active - a.active) || ((b.lastAccessed ?? 0) - (a.lastAccessed ?? 0)));
   return tab ?? null;
+}
+
+async function findSignedOutTab() {
+  const [tab] = await chrome.tabs.query({ url: CAPITAL_ONE_SIGNED_OUT });
+  return tab ?? null;
+}
+
+// A load failed because Capital One wants you to sign in, or no tab could answer. Put
+// whichever Capital One tab exists in front of you, instead of leaving it hidden while the
+// panel asks you to sign in. Once per load: every call in it fails the same way. Once
+// you've signed in, the tab watcher reloads the panel and hands you back.
+// Returns whether a tab is in front of you for signing in.
+async function bringSignInForward() {
+  if (signInShown) return true;
+  const tab = (await findCapitalOneTab()) ?? (await findSignedOutTab());
+  if (!tab) return false;
+  signInShown = true;
+  needsData = true;
+  autoOpenedTabId = tab.id;
+  await rememberCurrentTab();
+  // Only a page that has finished loading somewhere other than the sign-in site needs
+  // sending on: the "Log Back In" page, or an account page left over from before. Anything
+  // still loading is already on its way to sign-in, and a half-typed sign-in stays put.
+  const settled = tab.status === 'complete' && !tab.url?.startsWith('https://verified.capitalone.com/');
+  await showTab(tab, settled ? CAPITAL_ONE_HOME : undefined);
+  return true;
+}
+
+// Whether a failed load means "go and sign in", in which case the tab is brought forward.
+async function needsSignIn(error) {
+  if (!['SIGNED_OUT', 'NO_TAB', 'NO_BRIDGE'].includes(error.code)) return false;
+  try {
+    return await bringSignInForward();
+  } catch {
+    return false; // that tab closed meanwhile
+  }
 }
 
 // Talks to the content script, injecting it first if this tab predates the extension.
@@ -321,18 +384,22 @@ async function callBridge(type, payload = {}) {
   if (!response?.ok) {
     const error = new Error(response?.error ?? 'The Capital One page did not answer.');
     error.code = response?.code ?? 'UNKNOWN';
+    // Not awaited: the caller's message should appear while the tab comes forward.
+    if (error.code === 'SIGNED_OUT') bringSignInForward().catch(() => {});
     throw error;
   }
   return response.data;
 }
 
+// Brings a tab to the front, sending it to url first when there is one.
+async function showTab(tab, url) {
+  await chrome.tabs.update(tab.id, url ? { url, active: true } : { active: true });
+  await chrome.windows.update(tab.windowId, { focused: true });
+}
+
 async function openCapitalOne(url) {
   const tab = await findCapitalOneTab();
-  if (tab) {
-    await chrome.tabs.update(tab.id, { url, active: true });
-    await chrome.windows.update(tab.windowId, { focused: true });
-    return;
-  }
+  if (tab) return showTab(tab, url);
   await chrome.tabs.create({ url });
 }
 
@@ -342,7 +409,7 @@ function signInPrompt() {
   // A tab we opened is already in front of them showing the sign-in page, so pointing at
   // a link that opens a second one would be daft.
   if (autoOpenedTabId !== null) {
-    return 'Capital One is asking you to sign in. Finish in the tab that just opened and this panel will fill in.';
+    return 'Capital One is asking you to sign in. Finish in the Capital One tab and this panel will fill in.';
   }
   return ['Sign in to ', capitalOneLink(), ' and this panel will fill in on its own.'];
 }
@@ -352,7 +419,7 @@ function describe(error) {
     case 'NO_TAB':
       return signInPrompt();
     case 'SIGNED_OUT':
-      return ['That session timed out. Sign in to ', capitalOneLink(), ' again, then hit Refresh.'];
+      return 'Capital One signed you out. Sign in again in the Capital One tab and this panel will fill back in.';
     case 'UNAUTHORIZED':
       return 'Capital One refused that call. The session is fine; the request is missing something it wants.';
     case 'ACCOUNT_INCOMPLETE':
@@ -651,6 +718,7 @@ async function loadSuggestions() {
 
   // Every account at once rather than one after another, and a small page: this runs
   // while you are waiting to see the section, so the round trips should overlap.
+  let searchFailed = false;
   const searches = await Promise.all(
     Object.entries(accounts).map(async ([arid, account]) => {
       try {
@@ -663,6 +731,7 @@ async function loadSuggestions() {
         });
         return matches.map(card => ({ card, arid, account }));
       } catch {
+        searchFailed = true;
         return []; // one account failing should not cost the others
       }
     }),
@@ -683,7 +752,9 @@ async function loadSuggestions() {
     .map(match => ({ ...match, score: suggestionScore(match.card, host) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, SUGGEST_LIMIT);
-  suggestionCache.set(host, matches);
+  // A failed search, such as one with no Capital One tab open, says nothing about this site.
+  // Remembering its empty answer kept the site blank even after Capital One was back.
+  if (!searchFailed) suggestionCache.set(host, matches);
   renderSuggestions(matches);
 }
 
@@ -920,6 +991,7 @@ async function refresh() {
   const arid = currentArid();
   if (!arid) {
     // No accounts means the lookup could not run, which means no usable tab.
+    await needsSignIn({ code: 'NO_TAB' });
     setStatus(signInPrompt());
     waitForCapitalOne();
     return;
@@ -951,6 +1023,7 @@ async function refresh() {
     cards = loaded;
     renderCards();
     needsData = false;
+    signInShown = false;
     const counted = cards.length === total ? `${total} card${total === 1 ? '' : 's'}` : `${cards.length} of ${total} cards`;
     if (lookupErrors.length) setStatus(`${counted}. Lookup failed: ${lookupErrors.join(', ')}.`);
     else setStatus(counted, 'info', 'center');
@@ -959,7 +1032,7 @@ async function refresh() {
     needsData = true;
     cards = [];
     renderCards();
-    setStatus(describe(error), 'error');
+    setStatus((await needsSignIn(error)) ? signInPrompt() : describe(error), 'error');
     // No tab yet: start watching instead of leaving it to you to press Refresh.
     if (error.code === 'NO_TAB') waitForCapitalOne();
   }
@@ -1114,6 +1187,12 @@ async function init() {
   });
   els.refresh.addEventListener('click', reload);
 
+  // Close the tab the panel opened or brought forward, and it may open another next time.
+  // Without this, the "one unprompted tab" rule kept counting a tab that no longer exists.
+  chrome.tabs.onRemoved.addListener(tabId => {
+    if (tabId === autoOpenedTabId) autoOpenedTabId = null;
+  });
+
   // Follow the Capital One tab. Chrome reports single-page navigations here, which is
   // how switching accounts in the manager reaches us.
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -1123,6 +1202,10 @@ async function init() {
     const wasWaiting = Boolean(waitTimer);
     stopWaiting();
     if (wasWaiting || needsData) {
+      // After sign-in Capital One passes through several addresses before it settles, and a
+      // call made mid-way is cut off ("Could not reach Capital One"). So wait for the page to
+      // finish loading. If it moves on again first, that next address change lands here too.
+      if (tab.status !== 'complete' && !(await waitForTabReady(tabId))) return;
       await reload();
       // Cards loaded, so the sign-in really did take. Hand the tab back.
       if (!needsData) await returnToPreviousTab();
