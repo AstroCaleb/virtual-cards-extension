@@ -40,6 +40,10 @@ const HOSTS = {
   'myaccounts.capitalone.com': null, // anywhere: it's the only server the extension talks to
   'github.com': ['sidepanel/panel.html'], // the privacy policy link, opened only when clicked
   'capitalone.com': ['manifest.json'], // logo hosts allowed by the CSP, along with *.capitalone.com
+  // Tab address patterns for a signed-out Capital One tab, matched with chrome.tabs.query.
+  // Nothing is requested from them; the panel sends that tab back to sign in.
+  'www.capitalone.com': ['sidepanel/panel.js'],
+  'verified.capitalone.com': ['sidepanel/panel.js'],
   'www.w3.org': ['sidepanel/panel.css'], // an SVG namespace inside a data URL, never requested
 };
 

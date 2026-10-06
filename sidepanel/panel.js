@@ -2,6 +2,9 @@
 // script running on myaccounts.capitalone.com, which is the only place with the session.
 const CAPITAL_ONE_MATCH = 'https://myaccounts.capitalone.com/*';
 const CAPITAL_ONE_HOME = 'https://myaccounts.capitalone.com/accountSummary';
+// Where Capital One leaves a tab once your session ends: its signed-out page ("Log Back
+// In"), or its sign-in site. Neither can make API calls, but either can take you to sign in.
+const CAPITAL_ONE_SIGNED_OUT = ['https://www.capitalone.com/sign-out*', 'https://verified.capitalone.com/*'];
 const ACCOUNTS_KEY = 'accounts';
 const STATUS_FILTER_KEY = 'statusFilter';
 const AUTO_OPEN_KEY = 'autoOpen';
@@ -181,6 +184,16 @@ async function ensureCapitalOneTab() {
   }
   if (!autoOpen || autoOpenedTabId !== null) return null;
 
+  // A tab Capital One already signed out: send it to sign in and bring it forward, rather
+  // than opening a second tab next to it.
+  const [signedOut] = await chrome.tabs.query({ url: CAPITAL_ONE_SIGNED_OUT });
+  if (signedOut) {
+    autoOpenedTabId = signedOut.id;
+    await rememberCurrentTab();
+    await showTab(signedOut, CAPITAL_ONE_HOME);
+    return null;
+  }
+
   const created = await chrome.tabs.create({ url: CAPITAL_ONE_HOME, active: false });
   autoOpenedTabId = created.id;
   // This can take a while, and the tab is invisible, so say what is happening.
@@ -346,13 +359,14 @@ async function callBridge(type, payload = {}) {
   return response.data;
 }
 
+async function showTab(tab, url) {
+  await chrome.tabs.update(tab.id, { url, active: true });
+  await chrome.windows.update(tab.windowId, { focused: true });
+}
+
 async function openCapitalOne(url) {
   const tab = await findCapitalOneTab();
-  if (tab) {
-    await chrome.tabs.update(tab.id, { url, active: true });
-    await chrome.windows.update(tab.windowId, { focused: true });
-    return;
-  }
+  if (tab) return showTab(tab, url);
   await chrome.tabs.create({ url });
 }
 
@@ -362,7 +376,7 @@ function signInPrompt() {
   // A tab we opened is already in front of them showing the sign-in page, so pointing at
   // a link that opens a second one would be daft.
   if (autoOpenedTabId !== null) {
-    return 'Capital One is asking you to sign in. Finish in the tab that just opened and this panel will fill in.';
+    return 'Capital One is asking you to sign in. Finish in the Capital One tab and this panel will fill in.';
   }
   return ['Sign in to ', capitalOneLink(), ' and this panel will fill in on its own.'];
 }
