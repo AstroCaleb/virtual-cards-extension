@@ -1159,6 +1159,12 @@ async function init() {
   });
   els.refresh.addEventListener('click', reload);
 
+  // Close the tab the panel opened or brought forward, and it may open another next time.
+  // Without this, the "one unprompted tab" rule kept counting a tab that no longer exists.
+  chrome.tabs.onRemoved.addListener(tabId => {
+    if (tabId === autoOpenedTabId) autoOpenedTabId = null;
+  });
+
   // Follow the Capital One tab. Chrome reports single-page navigations here, which is
   // how switching accounts in the manager reaches us.
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
