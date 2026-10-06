@@ -61,6 +61,8 @@ const SUGGEST_DEBOUNCE_MS = 400;
 const CAPTURE_TTL_MS = 3 * 60 * 1000;
 // Signing in takes a while, so watch for a usable tab rather than making you press Refresh.
 const WAIT_POLL_MS = 2000;
+// How long to give Capital One before retrying the account and cardholder lookups once.
+const LOOKUP_RETRY_MS = 5000;
 const WAIT_TIMEOUT_MS = 3 * 60 * 1000;
 const COPY_LABELS = { number: 'Card number', expiry: 'Expiry', cvv: 'Security code' };
 
@@ -102,6 +104,7 @@ let accountOverrides = {}; // only what the user typed; everything else comes fr
 let cardholders = [];
 let cardholderById = new Map();
 let lookupErrors = []; // surfaced in the status line so failures are not silent
+let lookupRetried = false; // one quiet retry per run of failed lookups
 let cards = [];
 let searchTimer;
 let armedDelete = null; // the one card whose Delete is waiting for a confirming click
@@ -283,6 +286,17 @@ async function doReload() {
   // Deliberately not awaited: the list is already on screen, and blocking here would also
   // hold up the hand-back to your previous tab after a sign-in.
   if (!needsData) loadSuggestions().catch(() => {});
+
+  // Right after sign-in, Capital One answers the card list a few seconds before the account
+  // and cardholder lookups, which fail as NETWORK until then. Without them there are no
+  // account names or cardholders, and renaming or locking a card can't work. So try once
+  // more, quietly; if that fails too, the status line already says so.
+  if (!lookupErrors.length) {
+    lookupRetried = false;
+  } else if (!needsData && !lookupRetried && lookupErrors.some(error => error.endsWith(' NETWORK'))) {
+    lookupRetried = true;
+    setTimeout(() => reload().catch(() => {}), LOOKUP_RETRY_MS);
+  }
 }
 
 function currentArid() {
