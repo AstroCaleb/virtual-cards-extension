@@ -651,6 +651,7 @@ async function loadSuggestions() {
 
   // Every account at once rather than one after another, and a small page: this runs
   // while you are waiting to see the section, so the round trips should overlap.
+  let searchFailed = false;
   const searches = await Promise.all(
     Object.entries(accounts).map(async ([arid, account]) => {
       try {
@@ -663,6 +664,7 @@ async function loadSuggestions() {
         });
         return matches.map(card => ({ card, arid, account }));
       } catch {
+        searchFailed = true;
         return []; // one account failing should not cost the others
       }
     }),
@@ -683,7 +685,9 @@ async function loadSuggestions() {
     .map(match => ({ ...match, score: suggestionScore(match.card, host) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, SUGGEST_LIMIT);
-  suggestionCache.set(host, matches);
+  // A failed search, such as one with no Capital One tab open, says nothing about this site.
+  // Remembering its empty answer kept the site blank even after Capital One was back.
+  if (!searchFailed) suggestionCache.set(host, matches);
   renderSuggestions(matches);
 }
 
