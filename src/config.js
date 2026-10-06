@@ -1,5 +1,5 @@
 // Numeric path segments from Capital One's API, read off DevTools → Network on the
-// virtual card manager page. See docs/api-notes.md.
+// virtual card manager page.
 globalThis.C1_CONFIG = {
   origin: 'https://myaccounts.capitalone.com',
 

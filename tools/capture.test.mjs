@@ -2,9 +2,11 @@
 // is the most fragile part of the extension. Uses published test card numbers only.
 //
 // Run: node tools/capture.test.mjs
+import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { test } from 'node:test';
 import vm from 'node:vm';
 
 const source = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'content', 'capture.js'), 'utf8');
@@ -64,19 +66,12 @@ const cases = [
   },
 ];
 
-let failures = 0;
 for (const { name, input, expect } of cases) {
-  const [message] = run(input);
-  const got = message?.payload ?? null;
-  const ok = expect === null ? got === null : got && ['number', 'expiry', 'cvv'].every(k => got[k] === expect[k]);
-  if (!ok) {
-    failures++;
-    // Sample data, so printing it is fine.
-    console.error(`✗ ${name}\n  expected ${JSON.stringify(expect)}\n  got      ${JSON.stringify(got)}`);
-  } else {
-    console.log(`✓ ${name}`);
-  }
+  test(name, () => {
+    const [message] = run(input);
+    // Spread into this realm: the payload's prototype is the sandbox's own Object, which
+    // a strict deepEqual would count as a difference. Sample data, so printing it is fine.
+    const got = message ? { ...message.payload } : null;
+    assert.deepEqual(got, expect);
+  });
 }
-
-console.log(failures ? `\n${failures} failing` : `\n${cases.length} passing`);
-process.exit(failures ? 1 : 0);
