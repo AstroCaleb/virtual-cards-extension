@@ -13,7 +13,7 @@ https://github.com/user-attachments/assets/ef32a812-f45d-4bb9-9959-109d0f09b2bd
 
 ## Why I made this
 
-Capital One is shutting down Eno, its Chrome extension, on September 30, 2026. I used it constantly: a fresh virtual card number for every site, always one click away. I wasn't ready to give that up, and I know I'm not the only one. So I built my own, and I'm giving it away.
+Capital One shut down Eno, its Chrome extension, on September 30, 2026. I used it constantly: a fresh virtual card number for every site, always one click away. I wasn't ready to give that up, and I know I'm not the only one. So I built my own, and I'm giving it away.
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
