@@ -184,24 +184,9 @@ async function ensureCapitalOneTab() {
   }
   if (!autoOpen) return null;
 
-  // A tab Capital One already signed out: bring it forward to sign in, rather than opening
-  // a second tab next to it. Every time you ask, since that never piles up tabs. One already
-  // on the sign-in page is left as it is, so a half-typed sign-in isn't wiped.
-  const [signedOut] = await chrome.tabs.query({ url: CAPITAL_ONE_SIGNED_OUT });
-  if (signedOut) {
-    autoOpenedTabId = signedOut.id;
-    await rememberCurrentTab();
-    if (signedOut.url?.startsWith('https://verified.capitalone.com/')) {
-      await showTab(signedOut);
-      return null;
-    }
-    // Wait for it to land before any call goes to it: mid-redirect it can't answer, which
-    // reads as "the tab did not answer". It lands back on the servicing host only if the
-    // session turns out to be fine after all.
-    await showTab(signedOut, CAPITAL_ONE_HOME);
-    return waitForTabReady(signedOut.id);
-  }
-  if (autoOpenedTabId !== null) return null;
+  // A tab Capital One already signed out is reused, not joined by a second one. The load
+  // that follows fails, and bringSignInForward puts that tab in front of you.
+  if (autoOpenedTabId !== null || (await findSignedOutTab())) return null;
 
   const created = await chrome.tabs.create({ url: CAPITAL_ONE_HOME, active: false });
   autoOpenedTabId = created.id;
@@ -283,6 +268,7 @@ function reload() {
 }
 
 async function doReload() {
+  signInShown = false;
   // Best effort. If it cannot get a tab, the calls below fail with NO_TAB and the panel
   // falls back to asking you to sign in.
   try {
@@ -317,17 +303,40 @@ async function findCapitalOneTab() {
   return tab ?? null;
 }
 
-// Capital One answered with its sign-in page, so the session is over. Put that tab in front
-// of you on the account summary, which sends you through sign-in, instead of leaving it
-// hidden while the panel asks you to sign in. Every call in a reload fails the same way,
-// so this runs once until a load succeeds again. Once you've signed in, the tab watcher
-// reloads the panel and hands you back to where you were.
+async function findSignedOutTab() {
+  const [tab] = await chrome.tabs.query({ url: CAPITAL_ONE_SIGNED_OUT });
+  return tab ?? null;
+}
+
+// A load failed because Capital One wants you to sign in, or no tab could answer. Put
+// whichever Capital One tab exists in front of you, instead of leaving it hidden while the
+// panel asks you to sign in. Once per load: every call in it fails the same way. Once
+// you've signed in, the tab watcher reloads the panel and hands you back.
+// Returns whether a tab is in front of you for signing in.
 async function bringSignInForward() {
-  if (signInShown) return;
+  if (signInShown) return true;
+  const tab = (await findCapitalOneTab()) ?? (await findSignedOutTab());
+  if (!tab) return false;
   signInShown = true;
   needsData = true;
+  autoOpenedTabId = tab.id;
   await rememberCurrentTab();
-  await openCapitalOne(CAPITAL_ONE_HOME);
+  // Only a page that has finished loading somewhere other than the sign-in site needs
+  // sending on: the "Log Back In" page, or an account page left over from before. Anything
+  // still loading is already on its way to sign-in, and a half-typed sign-in stays put.
+  const settled = tab.status === 'complete' && !tab.url?.startsWith('https://verified.capitalone.com/');
+  await showTab(tab, settled ? CAPITAL_ONE_HOME : undefined);
+  return true;
+}
+
+// Whether a failed load means "go and sign in", in which case the tab is brought forward.
+async function needsSignIn(error) {
+  if (!['SIGNED_OUT', 'NO_TAB', 'NO_BRIDGE'].includes(error.code)) return false;
+  try {
+    return await bringSignInForward();
+  } catch {
+    return false; // that tab closed meanwhile
+  }
 }
 
 // Talks to the content script, injecting it first if this tab predates the extension.
@@ -964,6 +973,7 @@ async function refresh() {
   const arid = currentArid();
   if (!arid) {
     // No accounts means the lookup could not run, which means no usable tab.
+    await needsSignIn({ code: 'NO_TAB' });
     setStatus(signInPrompt());
     waitForCapitalOne();
     return;
@@ -1004,7 +1014,7 @@ async function refresh() {
     needsData = true;
     cards = [];
     renderCards();
-    setStatus(describe(error), 'error');
+    setStatus((await needsSignIn(error)) ? signInPrompt() : describe(error), 'error');
     // No tab yet: start watching instead of leaving it to you to press Refresh.
     if (error.code === 'NO_TAB') waitForCapitalOne();
   }
