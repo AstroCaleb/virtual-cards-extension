@@ -24,17 +24,22 @@ const SHIPPED_TYPES = /\.(?:js|html|css|png)$/;
 // can touch, so each one has to be added here on purpose.
 const MANIFEST = {
   keys: ['manifest_version', 'name', 'version', 'minimum_chrome_version', 'description', 'key', 'permissions',
-    'host_permissions', 'background', 'icons', 'action', 'side_panel', 'content_scripts'],
+    'host_permissions', 'background', 'icons', 'action', 'side_panel', 'content_scripts', 'content_security_policy'],
   permissions: ['sidePanel', 'tabs', 'scripting', 'storage'],
   hosts: ['https://myaccounts.capitalone.com/*'],
   backgroundKeys: ['service_worker', 'type'],
   contentScriptKeys: ['matches', 'js', 'css', 'run_at', 'all_frames'],
+  // Chrome enforces this on the panel and service worker: no network requests at all, and
+  // images only from the extension and Capital One. Content scripts aren't covered; they
+  // run under Capital One's page.
+  csp: "default-src 'self'; script-src 'self'; object-src 'none'; connect-src 'none'; img-src 'self' data: https://capitalone.com https://*.capitalone.com; base-uri 'none'; form-action 'none'",
 };
 
 // Every address the shipped code may name, and where. Anything else fails, even in a comment.
 const HOSTS = {
   'myaccounts.capitalone.com': null, // anywhere: it's the only server the extension talks to
   'github.com': ['sidepanel/panel.html'], // the privacy policy link, opened only when clicked
+  'capitalone.com': ['manifest.json'], // logo hosts allowed by the CSP, along with *.capitalone.com
   'www.w3.org': ['sidepanel/panel.css'], // an SVG namespace inside a data URL, never requested
 };
 
@@ -211,6 +216,9 @@ function checkManifest(root, fail) {
   }
   if (!same(MANIFEST.hosts, manifest.host_permissions)) {
     fail('manifest', 'manifest.json', `host_permissions must be exactly ${MANIFEST.hosts.join(', ')}`);
+  }
+  if (manifest.content_security_policy?.extension_pages !== MANIFEST.csp || extra(manifest.content_security_policy, ['extension_pages']).length) {
+    fail('manifest', 'manifest.json', 'content_security_policy must stay exactly as reviewed');
   }
   for (const script of manifest.content_scripts ?? []) {
     for (const key of extra(script, MANIFEST.contentScriptKeys)) fail('manifest', 'manifest.json', `new content script key "${key}"`);

@@ -31,6 +31,9 @@
   "side_panel": {
     "default_path": "sidepanel/panel.html"
   },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; connect-src 'none'; img-src 'self' data: https://capitalone.com https://*.capitalone.com; base-uri 'none'; form-action 'none'"
+  },
   "content_scripts": [
     {
       "matches": [

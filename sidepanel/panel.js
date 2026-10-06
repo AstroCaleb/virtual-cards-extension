@@ -112,6 +112,7 @@ let waitTimer = null;
 let autoOpen = true;
 let autoOpenedTabId = null; // one unprompted tab is enough; never pile them up
 let returnToTab = null; // where you were before any detour over to Capital One
+let signInShown = false; // the signed-out tab is already in front; once per sign-in
 let suggestTimer;
 const suggestionCache = new Map(); // host -> matches, so browsing does not re-query
 
@@ -285,9 +286,26 @@ function currentAccount() {
   return arid ? accounts[arid] : null;
 }
 
+// With more than one Capital One tab open, use the one you're looking at, then the one
+// you used last, rather than whichever Chrome happens to list first. One of them may be
+// signed out. lastAccessed needs Chrome 121; before that, Chrome's order stands.
 async function findCapitalOneTab() {
-  const [tab] = await chrome.tabs.query({ url: CAPITAL_ONE_MATCH });
+  const tabs = await chrome.tabs.query({ url: CAPITAL_ONE_MATCH });
+  const [tab] = tabs.toSorted((a, b) => (b.active - a.active) || ((b.lastAccessed ?? 0) - (a.lastAccessed ?? 0)));
   return tab ?? null;
+}
+
+// Capital One answered with its sign-in page, so the session is over. Put that tab in front
+// of you on the account summary, which sends you through sign-in, instead of leaving it
+// hidden while the panel asks you to sign in. Every call in a reload fails the same way,
+// so this runs once until a load succeeds again. Once you've signed in, the tab watcher
+// reloads the panel and hands you back to where you were.
+async function bringSignInForward() {
+  if (signInShown) return;
+  signInShown = true;
+  needsData = true;
+  await rememberCurrentTab();
+  await openCapitalOne(CAPITAL_ONE_HOME);
 }
 
 // Talks to the content script, injecting it first if this tab predates the extension.
@@ -321,6 +339,8 @@ async function callBridge(type, payload = {}) {
   if (!response?.ok) {
     const error = new Error(response?.error ?? 'The Capital One page did not answer.');
     error.code = response?.code ?? 'UNKNOWN';
+    // Not awaited: the caller's message should appear while the tab comes forward.
+    if (error.code === 'SIGNED_OUT') bringSignInForward().catch(() => {});
     throw error;
   }
   return response.data;
@@ -352,7 +372,7 @@ function describe(error) {
     case 'NO_TAB':
       return signInPrompt();
     case 'SIGNED_OUT':
-      return ['That session timed out. Sign in to ', capitalOneLink(), ' again, then hit Refresh.'];
+      return 'Capital One signed you out. Sign in again in the Capital One tab and this panel will fill back in.';
     case 'UNAUTHORIZED':
       return 'Capital One refused that call. The session is fine; the request is missing something it wants.';
     case 'ACCOUNT_INCOMPLETE':
@@ -951,6 +971,7 @@ async function refresh() {
     cards = loaded;
     renderCards();
     needsData = false;
+    signInShown = false;
     const counted = cards.length === total ? `${total} card${total === 1 ? '' : 's'}` : `${cards.length} of ${total} cards`;
     if (lookupErrors.length) setStatus(`${counted}. Lookup failed: ${lookupErrors.join(', ')}.`);
     else setStatus(counted, 'info', 'center');
