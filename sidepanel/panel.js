@@ -182,17 +182,20 @@ async function ensureCapitalOneTab() {
     autoOpenedTabId = null;
     return existing;
   }
-  if (!autoOpen || autoOpenedTabId !== null) return null;
+  if (!autoOpen) return null;
 
-  // A tab Capital One already signed out: send it to sign in and bring it forward, rather
-  // than opening a second tab next to it.
+  // A tab Capital One already signed out: bring it forward to sign in, rather than opening
+  // a second tab next to it. Every time you ask, since that never piles up tabs. One already
+  // on the sign-in page is left as it is, so a half-typed sign-in isn't wiped.
   const [signedOut] = await chrome.tabs.query({ url: CAPITAL_ONE_SIGNED_OUT });
   if (signedOut) {
     autoOpenedTabId = signedOut.id;
     await rememberCurrentTab();
-    await showTab(signedOut, CAPITAL_ONE_HOME);
+    const signingIn = signedOut.url?.startsWith('https://verified.capitalone.com/');
+    await showTab(signedOut, signingIn ? undefined : CAPITAL_ONE_HOME);
     return null;
   }
+  if (autoOpenedTabId !== null) return null;
 
   const created = await chrome.tabs.create({ url: CAPITAL_ONE_HOME, active: false });
   autoOpenedTabId = created.id;
@@ -359,8 +362,9 @@ async function callBridge(type, payload = {}) {
   return response.data;
 }
 
+// Brings a tab to the front, sending it to url first when there is one.
 async function showTab(tab, url) {
-  await chrome.tabs.update(tab.id, { url, active: true });
+  await chrome.tabs.update(tab.id, url ? { url, active: true } : { active: true });
   await chrome.windows.update(tab.windowId, { focused: true });
 }
 
