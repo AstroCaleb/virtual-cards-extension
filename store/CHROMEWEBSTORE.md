@@ -158,7 +158,7 @@ Certify all three:
 ## Distribution tab
 
 - **Payments:** Free
-- **Visibility:** Public, listed in store search since 2026-10-07 (unlisted before that)
+- **Visibility:** Public (listed in store search)
 - **Regions:** All regions, or just the United States, where `myaccounts.capitalone.com` accounts are
 
 ## Test instructions for the reviewer
