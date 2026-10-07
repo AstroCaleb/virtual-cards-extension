@@ -27,6 +27,8 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      # The release pull request's number when this run opened or updated it.
+      pr_number: ${{ steps.release.outputs.pr && fromJSON(steps.release.outputs.pr).number }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
@@ -61,6 +63,60 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag_name }}
         run: gh release upload "$TAG" dist/virtual-cards-extension.zip
+
+  # The branch ruleset requires "Privacy check (main's rules)", but GitHub doesn't start the
+  # Privacy workflow on pull requests the Actions bot opens, so the release pull request
+  # would wait for it forever. This runs main's privacy check on that pull request and
+  # posts the result under the same name. Only this job may post that check: a workflow
+  # that runs on pull requests could use it to fake a pass for a fork.
+  release-pr-privacy:
+    name: Privacy check for the release pull request
+    needs: release
+    if: needs.release.outputs.pr_number != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: read
+    steps:
+      - name: Checkout main's rules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+        with:
+          path: main
+          persist-credentials: false
+
+      - name: Find the release pull request's latest commit
+        id: head
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.release.outputs.pr_number }}
+        run: echo "sha=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq .head.sha)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the release pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+        with:
+          ref: ${{ steps.head.outputs.sha }}
+          path: pull-request
+          persist-credentials: false
+
+      - name: Check it with main's rules, and report the result on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+        run: |
+          if node main/tools/check-privacy.mjs pull-request --base main > result.txt 2>&1; then
+            conclusion=success
+          else
+            conclusion=failure
+          fi
+          cat result.txt
+          gh api "repos/$GITHUB_REPOSITORY/check-runs" \
+            -f name="Privacy check (main's rules)" \
+            -f head_sha="$HEAD_SHA" \
+            -f status=completed \
+            -f conclusion="$conclusion" \
+            -f "output[title]=Privacy check: $conclusion" \
+            -f "output[summary]=$(grep -v '^::' result.txt | head -c 60000)" > /dev/null
 
   # Signs in to Google without a stored key: Google trusts this repository's main branch
   # directly (workload identity federation), so there is no secret that could leak and
