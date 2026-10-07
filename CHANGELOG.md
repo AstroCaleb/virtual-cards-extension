@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.1.1...v1.1.2) (2026-10-06)
+
+
+### Bug Fixes
+
+* bring the Capital One tab forward when your session expires ([#13](https://github.com/AstroCaleb/virtual-cards-extension/issues/13)) ([52db89a](https://github.com/AstroCaleb/virtual-cards-extension/commit/52db89a6386fd95ee833ee492bc47878e91e2167))
+
 ## [1.1.1](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.1.0...v1.1.1) (2026-09-23)
 
 
