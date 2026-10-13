@@ -17,7 +17,7 @@ Capital One shut down Eno, its Chrome extension, on September 30, 2026. I used i
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
-It works in Chrome and Microsoft Edge. If you use Firefox, you may not need it: as of September 2026, Eno's Firefox listing doesn't mention a shutdown, and Capital One updated it in July.
+It works in Chrome and Microsoft Edge. Capital One has discontinued Eno for Firefox too, but there's no Firefox version of Virtual Card Helper.
 
 ## What it does
 
