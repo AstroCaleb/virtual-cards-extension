@@ -94,6 +94,8 @@ const cases = [
   ['a stylesheet import', append('sidepanel/panel.css', "@import 'theme.css';"), 'banned'],
   ['a minified line', append('sidepanel/panel.js', `const blob = '${'a'.repeat(400)}';`), 'long-line'],
   ['a new kind of shipped file', folder => writeFileSync(join(folder, 'src/engine.wasm'), 'x'), 'shipped-files'],
+  ['adding the whole repository to the store zip', replace('.github/workflows/release.yml', 'zip -r -X store.zip manifest.json service-worker.js content sidepanel src icons LICENSE', 'zip -r -X store.zip manifest.json service-worker.js content sidepanel src icons LICENSE\n          zip -r -X store.zip .'), 'packaging'],
+  ['a changed Firefox build script', append('tools/build-firefox.mjs', '// ships extra files'), 'pinned-file'],
   ['an extra folder in the store zip', replace('.github/workflows/release.yml', 'zip -r -X store.zip manifest.json', 'zip -r -X store.zip vendor manifest.json'), 'packaging'],
   ['a HAR capture', folder => { mkdirSync(join(folder, 'har')); writeFileSync(join(folder, 'har/session.har'), '{}'); }, 'forbidden-file'],
   ['a real-looking card number', append('README.md', `My card: ${realLookingNumber()}`), 'card-number'],

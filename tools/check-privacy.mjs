@@ -10,6 +10,7 @@
 //
 // The Privacy workflow points this at pull requests from forks, so it only ever reads the
 // folder it checks as text. It never runs, imports or evaluates anything from it.
+import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,6 +65,18 @@ const FIREFOX = {
     },
   },
 };
+
+// tools/build-firefox.mjs is what copies files into the Firefox zip and writes its manifest,
+// so it could ship anything whatever tools/firefox.json says. Pinned by hash: after
+// reviewing a change to it, update the hash here (shasum -a 256 tools/build-firefox.mjs).
+const PINNED_FILES = {
+  'tools/build-firefox.mjs': 'fcd3d2f1304c74f42c7b818547d2c23ddc1a2e52cf105f927e03d412c6ea72e2',
+};
+
+// The one zip step that may pack a whole folder: the Firefox build in dist/firefox, whose
+// contents tools/firefox.json and the pinned build script decide. Any other "zip ... ."
+// could add the whole repository to a release zip.
+const FIREFOX_ZIP_STEP = /^\s*\(cd dist\/firefox && zip -r -X \.\.\/virtual-cards-extension-firefox\.zip \.\)\s*$/;
 
 // Every address the shipped code may name, and where. Anything else fails, even in a comment.
 const HOSTS = {
@@ -178,7 +191,7 @@ const SKIPPED_FOLDERS = new Set(['.git', 'node_modules', 'dist']);
 // Changes here are allowed but deserve a careful read, because they change the checks
 // themselves, what ships, or what agents working in the repository are told to do.
 const GUARDED = ['.github', 'tools/check-privacy.mjs', 'tools/check-privacy.test.mjs', 'manifest.json',
-  'tools/firefox.json', 'tools/build-firefox.mjs', 'firefox', 'PRIVACY.md', 'AGENTS.md', 'CLAUDE.md', 'CONTRIBUTING.md'];
+  'tools/firefox.json', 'tools/build-firefox.mjs', 'tools/firefox-addons.mjs', 'tools/chrome-web-store.mjs', 'firefox', 'PRIVACY.md', 'AGENTS.md', 'CLAUDE.md', 'CONTRIBUTING.md'];
 
 const LONG_LINE = 300;
 
@@ -268,6 +281,14 @@ const canonical = value => JSON.stringify(value, (key, inner) =>
     ? Object.fromEntries(Object.keys(inner).sort((a, b) => a.localeCompare(b)).map(name => [name, inner[name]]))
     : inner);
 
+function checkPinnedFiles(root, fail) {
+  for (const [file, expected] of Object.entries(PINNED_FILES)) {
+    const text = readText(root, file);
+    const actual = text === null ? 'missing' : createHash('sha256').update(text).digest('hex');
+    if (actual !== expected) fail('pinned-file', file, 'changed since it was reviewed; check what it ships, then update its hash in PINNED_FILES');
+  }
+}
+
 function checkFirefox(root, fail) {
   const file = 'tools/firefox.json';
   let config;
@@ -288,6 +309,7 @@ function checkPackaging(root, fail) {
   if (text === null) return fail('packaging', file, 'release.yml is missing');
   // "zip -r -X name.zip files…" and "cp -R files… destination", read word by word.
   const lists = text.split('\n').flatMap(line => {
+    if (FIREFOX_ZIP_STEP.test(line)) return [];
     const words = line.replaceAll(/[()]/g, ' ').trim().split(/\s+/);
     const zip = words.indexOf('zip');
     if (zip !== -1 && words[zip + 1] === '-r' && words[zip + 2] === '-X') return [words.slice(zip + 4)];
@@ -295,9 +317,8 @@ function checkPackaging(root, fail) {
     return copy !== -1 && words[copy + 1] === '-R' ? [words.slice(copy + 2, -1)] : [];
   });
   const expected = sorted(SHIPPED).join(' ');
-  // The GitHub zip packs the folder the cp step filled, and the Firefox zip packs dist/firefox
-  // (".") as tools/firefox.json built it, so only the cp and store zip lists count here.
-  const packaged = lists.filter(list => !list.some(entry => entry.startsWith('virtual-cards-extension') || entry === '.'));
+  // The GitHub zip packs the folder the cp step filled, so only the cp and store zip lists count.
+  const packaged = lists.filter(list => !list.some(entry => entry.startsWith('virtual-cards-extension')));
   if (packaged.length !== 2 || packaged.some(list => sorted(list).join(' ') !== expected)) {
     fail('packaging', file, `both release zips must contain exactly: ${SHIPPED.join(' ')}`);
   }
@@ -462,6 +483,7 @@ export function checkRepository(root, base) {
 
   checkManifest(root, fail);
   checkFirefox(root, fail);
+  checkPinnedFiles(root, fail);
   checkPackaging(root, fail);
   checkPins(root, fail);
   for (const file of listFiles(root)) {

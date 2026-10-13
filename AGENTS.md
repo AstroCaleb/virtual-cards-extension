@@ -45,7 +45,7 @@ git ls-files '*.js' '*.mjs' | xargs -n 1 node --check
   - Never handle Capital One passwords or texted codes. Step-up verification happens on Capital One's own page.
 - Never rewrite or mask what Capital One's pages display.
 - No new permissions, host access, dependencies, build step, remote code, `eval`, `innerHTML`, or minified or encoded code.
-- Keep one codebase. Firefox-specific settings go only in `tools/firefox.json` and `firefox/`; `check-privacy.mjs` pins `tools/firefox.json`, so changing it needs the maintainer's review.
+- Keep one codebase. Firefox-specific settings go only in `tools/firefox.json` and `firefox/`; `check-privacy.mjs` pins `tools/firefox.json` and `tools/build-firefox.mjs` (by hash), so changing either needs the maintainer's review.
 - Keep the manifest's `content_security_policy`. It stops the panel and service worker from making any network request.
 - Never weaken `tools/check-privacy.mjs` to get a change through. If a rule really has to change, change it in the same pull request, say why in the description, and point it out to the maintainer.
 - If data handling changes, update `PRIVACY.md` and its date, update the disclosures in `store/CHROMEWEBSTORE.md`, and raise `NOTICE_VERSION` in `sidepanel/panel.js`.
