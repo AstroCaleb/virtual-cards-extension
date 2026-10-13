@@ -4,7 +4,7 @@ Instructions for AI coding agents working in this repository. [CONTRIBUTING.md](
 
 ## What this is
 
-Virtual Card Helper is an unofficial Chrome and Edge side panel for Capital One virtual card numbers. It's Manifest V3 and plain JavaScript, with no build step, no dependencies and no `package.json`. The repository root is the extension.
+Virtual Card Helper is an unofficial side panel for Capital One virtual card numbers, in Chrome, Edge and Firefox. It's Manifest V3 and plain JavaScript, with no build step, no dependencies and no `package.json`. The repository root is the Chrome extension. The Firefox version is the same files with a different manifest; building it only copies them and writes that manifest.
 
 | Path | Role |
 | --- | --- |
@@ -12,11 +12,13 @@ Virtual Card Helper is an unofficial Chrome and Edge side panel for Capital One 
 | `content/bridge.js` | Content script on `myaccounts.capitalone.com` that makes every API call for the panel. |
 | `content/capture.js` | Reads card details off Capital One's reveal and create screens by shape (a Luhn-valid number, an MM/YY, a labelled CVV) and sends them to the panel. |
 | `src/c1-api.js` | Everything that knows the shape of Capital One's API. `src/config.js` holds its route IDs. |
-| `service-worker.js` | Opens the panel from the toolbar icon. |
+| `service-worker.js` | Opens the panel from the toolbar icon (Chrome and Edge). |
+| `firefox/background.js` | Firefox only: opens the panel as a sidebar from the toolbar button, since Firefox has no side panel or extension service worker. |
+| `tools/firefox.json` | What the Firefox manifest drops and adds, and which files the Firefox zip ships. `tools/build-firefox.mjs` builds it into `dist/firefox`. |
 | `tools/` | Node scripts for tests, CI and the store. Not shipped. |
-| `store/CHROMEWEBSTORE.md` | Paste-ready store listing, data disclosures and version history. |
+| `store/CHROMEWEBSTORE.md`, `store/FIREFOX-ADDONS.md` | Paste-ready store listings, data disclosures and version history. |
 
-Only `manifest.json`, `service-worker.js`, `content/`, `sidepanel/`, `src/`, `icons/` and `LICENSE` ship. The zip steps in `.github/workflows/release.yml` decide that.
+The Chrome zip ships only `manifest.json`, `service-worker.js`, `content/`, `sidepanel/`, `src/`, `icons/` and `LICENSE`. The Firefox zip ships the files listed in `tools/firefox.json` plus its generated manifest. The zip steps in `.github/workflows/release.yml` decide that.
 
 ## Commands
 
@@ -27,13 +29,14 @@ node tools/capture.test.mjs        # capture.js against sample screens
 node tools/check-manifest.mjs      # store limits, referenced files, version sync, extension ID
 node tools/check-privacy.mjs       # the privacy rules in PRIVACY.md
 node tools/check-privacy.test.mjs  # the privacy check catches what it should
+node tools/build-firefox.mjs       # builds the Firefox version into dist/firefox
 git ls-files '*.js' '*.mjs' | xargs -n 1 node --check
 ```
 
 ## Hard rules
 
 - Never push to `main`. Work on a branch, open a pull request, and squash-merge.
-- Pull request titles are Conventional Commits, and they decide releases. `fix:` and `feat:` publish a release and submit it to the Chrome Web Store. `docs:`, `ci:`, `chore:`, `test:` and `refactor:` don't. Choose by whether users get a changed extension.
+- Pull request titles are Conventional Commits, and they decide releases. `fix:` and `feat:` publish a release and submit it to the Chrome Web Store and Firefox Add-ons. `docs:`, `ci:`, `chore:`, `test:` and `refactor:` don't. Choose by whether users get a changed extension.
 - Never edit `version` in `manifest.json` or `.release-please-manifest.json`. release-please owns it.
 - Keep every promise in `PRIVACY.md`:
   - Network requests go only to `myaccounts.capitalone.com`, and only from `src/c1-api.js`. Merchant logos load only from Capital One's hosts.
@@ -42,6 +45,7 @@ git ls-files '*.js' '*.mjs' | xargs -n 1 node --check
   - Never handle Capital One passwords or texted codes. Step-up verification happens on Capital One's own page.
 - Never rewrite or mask what Capital One's pages display.
 - No new permissions, host access, dependencies, build step, remote code, `eval`, `innerHTML`, or minified or encoded code.
+- Keep one codebase. Firefox-specific settings go only in `tools/firefox.json` and `firefox/`; `check-privacy.mjs` pins `tools/firefox.json`, so changing it needs the maintainer's review.
 - Keep the manifest's `content_security_policy`. It stops the panel and service worker from making any network request.
 - Never weaken `tools/check-privacy.mjs` to get a change through. If a rule really has to change, change it in the same pull request, say why in the description, and point it out to the maintainer.
 - If data handling changes, update `PRIVACY.md` and its date, update the disclosures in `store/CHROMEWEBSTORE.md`, and raise `NOTICE_VERSION` in `sidepanel/panel.js`.
@@ -57,7 +61,7 @@ git ls-files '*.js' '*.mjs' | xargs -n 1 node --check
 
 ## Testing in the browser
 
-You can't sign in to Capital One, so ask the maintainer to test live flows. For anything that touches the API, have them try a write (rename or lock) and a reveal, not just the card list, because one successful read proves nothing about the rest. After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension and the Capital One tab.
+You can't sign in to Capital One, so ask the maintainer to test live flows. For anything that touches the API, have them try a write (rename or lock) and a reveal, not just the card list, because one successful read proves nothing about the rest. After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension and the Capital One tab. In Firefox, run `node tools/build-firefox.mjs` after each change, then reload the temporary add-on from `about:debugging#/runtime/this-firefox` (first load: **Load Temporary Add-on** → `dist/firefox/manifest.json`).
 
 ## Style
 

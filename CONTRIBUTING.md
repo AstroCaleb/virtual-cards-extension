@@ -25,6 +25,8 @@ These are the promises in [PRIVACY.md](PRIVACY.md), and [the privacy check](#the
 
 After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension **and** the Capital One tab.
 
+To try it in Firefox, run `node tools/build-firefox.mjs`, then go to `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on** and choose `dist/firefox/manifest.json`. It's the same code with a Firefox manifest, so rebuild and reload it after each change. Firefox removes it when you quit.
+
 If your change affects how the extension talks to Capital One, try more than the card list: rename or lock a card, then show a card number. A read that works doesn't prove a write will.
 
 Then run the checks. They need only Node, with nothing to install:
@@ -42,7 +44,7 @@ All four also run on every pull request.
 
 Pull requests are squash-merged, so the title becomes the commit on `main`, and [release-please](https://github.com/googleapis/release-please) reads it:
 
-- `fix:` releases a patch and `feat:` releases a minor version. Both publish a GitHub release and send that version to the Chrome Web Store for review.
+- `fix:` releases a patch and `feat:` releases a minor version. Both publish a GitHub release and send that version to the Chrome Web Store and Firefox Add-ons for review.
 - `docs:`, `ci:`, `chore:`, `test:` and `refactor:` don't release anything.
 
 Choose by whether people get a changed extension. Write the rest of the title for them, because it becomes the line in the changelog, for example `fix: keep Show working after Capital One signs you out`.
@@ -67,6 +69,7 @@ If a change affects what the extension reads, saves or sends, the same pull requ
 - adds a network, tab, clipboard or logging call beyond the ones already reviewed
 - runs code built from text, turns text into page markup, or hides what it does (`eval`, `innerHTML`, `atob`, encoded strings, computed global names, minified lines)
 - ships a file other than `.js`, `.html`, `.css` or `.png`, or changes what goes into the release zips
+- changes the Firefox build settings in `tools/firefox.json`, which decide what the Firefox version can reach and what it declares to Firefox
 - contains something shaped like a real card number, or a HAR export, key or zip, anywhere in the repository
 
 It runs twice on every pull request. **Checks** runs the pull request's own copy, so a change to the rules can be tested. **Privacy** runs `main`'s copy, which a pull request can't edit. If your change really does need a rule to change, update it in the same pull request and say why. The Privacy run will stay red until I've reviewed it, and that's expected.

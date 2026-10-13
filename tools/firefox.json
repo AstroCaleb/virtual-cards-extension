@@ -1,0 +1,28 @@
+{
+  "files": ["content", "sidepanel", "src", "icons", "firefox/background.js", "LICENSE"],
+  "removeKeys": ["key", "minimum_chrome_version", "side_panel", "background"],
+  "removePermissions": ["sidePanel"],
+  "addKeys": {
+    "background": {
+      "scripts": ["firefox/background.js"]
+    },
+    "sidebar_action": {
+      "default_panel": "sidepanel/panel.html",
+      "default_title": "Virtual Card Helper",
+      "default_icon": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png"
+      },
+      "open_at_install": false
+    },
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "virtual-card-helper@astrocaleb",
+        "strict_min_version": "140.0",
+        "data_collection_permissions": {
+          "required": ["personallyIdentifyingInfo", "financialAndPaymentInfo", "browsingActivity", "websiteContent"]
+        }
+      }
+    }
+  }
+}

