@@ -17,7 +17,7 @@ Capital One shut down Eno, its Chrome extension, on September 30, 2026. I used i
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
-It works in Chrome and Microsoft Edge. If you use Firefox, you may not need it: as of September 2026, Eno's Firefox listing doesn't mention a shutdown, and Capital One updated it in July.
+It works in Chrome and Microsoft Edge. Capital One has discontinued Eno for Firefox too, and a Firefox version is on its way to Firefox Add-ons.
 
 ## What it does
 
@@ -91,7 +91,7 @@ Your nicknames and settings carry over. To hear about new versions, click **Watc
 
 ## Good to know
 
-- It works in Chrome 116 or newer and in Microsoft Edge, on a computer. There's no Firefox version.
+- It works in Chrome 116 or newer and in Microsoft Edge, on a computer. A Firefox version (Firefox 140 or newer) is on its way to Firefox Add-ons.
 - If Capital One changes its website, the extension may stop working until I update it.
 - It can't fill in checkout forms. You copy and paste.
 
@@ -121,6 +121,8 @@ All four also run on every pull request. Before opening one, read [CONTRIBUTING.
 
 After editing `sidepanel/`, reload the extension. After editing `content/` or `src/`, reload the extension **and** the Capital One tab.
 
-Releases are automated. Commits to `main` that start with `fix:` or `feat:` open a release pull request, and merging it publishes the new version on GitHub and submits it to the Chrome Web Store for review.
+The Firefox version is the same files with its own manifest. `node tools/build-firefox.mjs` builds it into `dist/firefox`, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to try it.
+
+Releases are automated. Commits to `main` that start with `fix:` or `feat:` open a release pull request, and merging it publishes the new version on GitHub and submits it to the Chrome Web Store and Firefox Add-ons for review. Each release also carries `virtual-cards-extension-firefox.zip`, the package sent to Firefox Add-ons. Firefox only keeps add-ons that Mozilla has signed, so that zip isn't meant for installing by hand.
 
 </details>

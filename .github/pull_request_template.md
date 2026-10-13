@@ -1,5 +1,5 @@
 <!--
-The title decides releases: fix: or feat: ships a new version to GitHub and the Chrome Web Store.
+The title decides releases: fix: or feat: ships a new version to GitHub, the Chrome Web Store and Firefox Add-ons.
 docs:, ci:, chore:, test: and refactor: don't. See CONTRIBUTING.md.
 Never include card numbers or screenshots of a real account.
 -->
@@ -14,4 +14,4 @@ Never include card numbers or screenshots of a real account.
 
 ## Tested
 
-<!-- What you tried in Chrome: the card list, a rename or lock, showing a card number, creating a card. -->
+<!-- What you tried, and in which browser (Chrome, Edge or Firefox): the card list, a rename or lock, showing a card number, creating a card. -->
