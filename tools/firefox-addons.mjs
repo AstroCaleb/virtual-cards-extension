@@ -14,10 +14,9 @@ import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 
 const ADDON_ID = 'virtual-card-helper@astrocaleb';
-// Overridable only so the flow can be exercised against a local stand-in, so nothing else
-// is accepted: the signed token goes wherever this points.
-const API = process.env.AMO_API ?? 'https://addons.mozilla.org';
-const ALLOWED_API = /^(?:https:\/\/addons\.mozilla\.org|http:\/\/127\.0\.0\.1:\d{1,5})$/;
+// AMO_API=local points it at a stand-in on port 9555 to exercise the flow. Only that switch
+// is read, never an address: the signed token goes wherever this points.
+const API = process.env.AMO_API === 'local' ? 'http://127.0.0.1:9555' : 'https://addons.mozilla.org';
 // Validation usually takes well under a minute; give it five before giving up.
 const POLL_MS = Number(process.env.AMO_POLL_MS ?? 5000);
 const POLL_LIMIT = 60;
@@ -36,7 +35,6 @@ function fail(message) {
 }
 
 if (!issuer || !secret) fail('AMO_JWT_ISSUER and AMO_JWT_SECRET must both be set.');
-if (!ALLOWED_API.test(API)) fail('AMO_API may only point at addons.mozilla.org or a local stand-in.');
 
 function token() {
   const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
