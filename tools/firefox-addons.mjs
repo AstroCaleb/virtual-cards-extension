@@ -14,8 +14,10 @@ import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 
 const ADDON_ID = 'virtual-card-helper@astrocaleb';
-// Overridable only so the flow can be exercised against a local stand-in.
+// Overridable only so the flow can be exercised against a local stand-in, so nothing else
+// is accepted: the signed token goes wherever this points.
 const API = process.env.AMO_API ?? 'https://addons.mozilla.org';
+const ALLOWED_API = /^(?:https:\/\/addons\.mozilla\.org|http:\/\/127\.0\.0\.1:\d{1,5})$/;
 // Validation usually takes well under a minute; give it five before giving up.
 const POLL_MS = Number(process.env.AMO_POLL_MS ?? 5000);
 const POLL_LIMIT = 60;
@@ -34,6 +36,7 @@ function fail(message) {
 }
 
 if (!issuer || !secret) fail('AMO_JWT_ISSUER and AMO_JWT_SECRET must both be set.');
+if (!ALLOWED_API.test(API)) fail('AMO_API may only point at addons.mozilla.org or a local stand-in.');
 
 function token() {
   const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -73,17 +76,21 @@ async function publish() {
   form.append('channel', 'listed');
   let upload = await call('POST', 'addons/upload/', form);
 
+  // The upload's ID comes back from the API and goes into later paths, so it has to look
+  // like an ID: anything else could point a signed request at a different path.
+  const uuid = String(upload.uuid ?? '');
+  if (!/^[\w-]{1,64}$/.test(uuid)) fail(`Mozilla returned an unexpected upload ID: ${uuid.slice(0, 80)}`);
   for (let poll = 0; !upload.processed && poll < POLL_LIMIT; poll++) {
     await new Promise(resolve => setTimeout(resolve, POLL_MS));
-    upload = await call('GET', `addons/upload/${upload.uuid}/`);
+    upload = await call('GET', `addons/upload/${encodeURIComponent(uuid)}/`);
   }
-  if (!upload.processed) fail(`Mozilla's validation didn't finish in time. Upload ${upload.uuid} can be submitted from the Developer Hub.`);
+  if (!upload.processed) fail(`Mozilla's validation didn't finish in time. Upload ${uuid} can be submitted from the Developer Hub.`);
   if (!upload.valid) {
     const errors = (upload.validation?.messages ?? []).filter(message => message.type === 'error').map(message => message.message);
     fail(`Mozilla's validation rejected ${upload.version ?? 'the upload'}: ${errors.join('; ') || 'see the Developer Hub'}`);
   }
 
-  const version = await call('POST', `${addon}/versions/`, { upload: upload.uuid });
+  const version = await call('POST', `${addon}/versions/`, { upload: uuid });
   log(`✓ Uploaded ${version.version} and submitted for review: ${version.file?.status ?? 'submitted'}`);
 }
 
