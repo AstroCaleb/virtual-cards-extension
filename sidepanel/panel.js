@@ -1261,7 +1261,7 @@ async function init() {
       await navigator.clipboard.writeText(captured[field]);
       setStatus(`${COPY_LABELS[field]} copied. It stays on the clipboard until something replaces it.`);
     } catch {
-      setStatus('Chrome refused the clipboard. Select the value and copy it by hand.', 'error');
+      setStatus('Your browser refused the clipboard. Select the value and copy it by hand.', 'error');
     }
   });
 

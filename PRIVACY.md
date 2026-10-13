@@ -1,8 +1,8 @@
 # Privacy policy
 
-**Virtual Card Helper**, a free, unofficial Chrome extension by Caleb Dudley. It is not made by, affiliated with, or endorsed by Capital One.
+**Virtual Card Helper**, a free, unofficial browser extension for Chrome, Edge and Firefox by Caleb Dudley. It is not made by, affiliated with, or endorsed by Capital One.
 
-Last updated: September 23, 2026
+Last updated: October 13, 2026
 
 ## The short version
 
@@ -18,7 +18,7 @@ Virtual Card Helper talks only to Capital One, from your own signed-in browser t
 
 **Your clipboard.** Clicking **Copy** puts that card detail on your clipboard. Clicking **New card** puts the current site's address there, so you can paste it as the card's name. Whatever you copy stays on your clipboard until you copy something else, just like any other copy.
 
-**Saved on your computer.** The extension uses Chrome's local storage, which stays on your computer and is never synced. It saves:
+**Saved on your computer.** The extension uses the browser's local extension storage, which stays on your computer and is never synced. It saves:
 
 - the nicknames you give your accounts
 - Capital One's internal reference for each account, taken from the page address (not a card number)
@@ -36,7 +36,7 @@ Nothing is sold, shared with anyone else, or used for anything other than the fe
 
 ## How long it's kept, and how to delete it
 
-Full card details last at most 3 minutes, in memory only. Saved settings stay until you remove the extension. Removing it from `chrome://extensions` deletes all of them.
+Full card details last at most 3 minutes, in memory only. Saved settings stay until you remove the extension. Removing it (from `chrome://extensions` in Chrome or Edge, or `about:addons` in Firefox) deletes all of them.
 
 ## Changes
 

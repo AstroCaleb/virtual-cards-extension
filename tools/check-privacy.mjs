@@ -10,6 +10,7 @@
 //
 // The Privacy workflow points this at pull requests from forks, so it only ever reads the
 // folder it checks as text. It never runs, imports or evaluates anything from it.
+import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,8 @@ import { fileURLToPath } from 'node:url';
 // number and forbidden-file checks.
 const SHIPPED = ['manifest.json', 'service-worker.js', 'content', 'sidepanel', 'src', 'icons', 'LICENSE'];
 const SHIPPED_TYPES = /\.(?:js|html|css|png)$/;
+// The Firefox build also ships firefox/, so it gets the same rules as the shipped files.
+const SCANNED = [...SHIPPED, 'firefox'];
 
 // The manifest's reach. A new permission, host or top-level key changes what the extension
 // can touch, so each one has to be added here on purpose.
@@ -34,6 +37,46 @@ const MANIFEST = {
   // run under Capital One's page.
   csp: "default-src 'self'; script-src 'self'; object-src 'none'; connect-src 'none'; img-src 'self' data: https://capitalone.com https://*.capitalone.com; base-uri 'none'; form-action 'none'",
 };
+
+// tools/firefox.json turns the manifest above into the Firefox one: what's dropped, what's
+// added (sidebar, background script, add-on ID, data declaration) and which files ship.
+// It decides what the Firefox version can reach, so it must match this exactly.
+const FIREFOX = {
+  files: ['content', 'sidepanel', 'src', 'icons', 'firefox/background.js', 'LICENSE'],
+  removeKeys: ['key', 'minimum_chrome_version', 'side_panel', 'background'],
+  removePermissions: ['sidePanel'],
+  addKeys: {
+    background: { scripts: ['firefox/background.js'] },
+    sidebar_action: {
+      default_panel: 'sidepanel/panel.html',
+      default_title: 'Virtual Card Helper',
+      default_icon: { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png' },
+      open_at_install: false,
+    },
+    browser_specific_settings: {
+      gecko: {
+        id: 'virtual-card-helper@astrocaleb',
+        strict_min_version: '140.0',
+        // The same data types the Chrome Web Store listing declares.
+        data_collection_permissions: {
+          required: ['personallyIdentifyingInfo', 'financialAndPaymentInfo', 'browsingActivity', 'websiteContent'],
+        },
+      },
+    },
+  },
+};
+
+// tools/build-firefox.mjs is what copies files into the Firefox zip and writes its manifest,
+// so it could ship anything whatever tools/firefox.json says. Pinned by hash: after
+// reviewing a change to it, update the hash here (shasum -a 256 tools/build-firefox.mjs).
+const PINNED_FILES = {
+  'tools/build-firefox.mjs': 'fcd3d2f1304c74f42c7b818547d2c23ddc1a2e52cf105f927e03d412c6ea72e2',
+};
+
+// The one zip step that may pack a whole folder: the Firefox build in dist/firefox, whose
+// contents tools/firefox.json and the pinned build script decide. Any other "zip ... ."
+// could add the whole repository to a release zip.
+const FIREFOX_ZIP_STEP = /^\s*\(cd dist\/firefox && zip -r -X \.\.\/virtual-cards-extension-firefox\.zip \.\)\s*$/;
 
 // Every address the shipped code may name, and where. Anything else fails, even in a comment.
 const HOSTS = {
@@ -148,7 +191,7 @@ const SKIPPED_FOLDERS = new Set(['.git', 'node_modules', 'dist']);
 // Changes here are allowed but deserve a careful read, because they change the checks
 // themselves, what ships, or what agents working in the repository are told to do.
 const GUARDED = ['.github', 'tools/check-privacy.mjs', 'tools/check-privacy.test.mjs', 'manifest.json',
-  'PRIVACY.md', 'AGENTS.md', 'CLAUDE.md', 'CONTRIBUTING.md'];
+  'tools/firefox.json', 'tools/build-firefox.mjs', 'tools/firefox-addons.mjs', 'tools/chrome-web-store.mjs', 'firefox', 'PRIVACY.md', 'AGENTS.md', 'CLAUDE.md', 'CONTRIBUTING.md'];
 
 const LONG_LINE = 300;
 
@@ -166,7 +209,7 @@ function listFiles(root, folder = '') {
 }
 
 const safePath = value => String(value).replaceAll(/[^\w./@-]/g, '?');
-const isShipped = file => SHIPPED.some(path => file === path || file.startsWith(`${path}/`));
+const isShipped = file => SCANNED.some(path => file === path || file.startsWith(`${path}/`));
 const lineOf = (text, index) => text.slice(0, index).split('\n').length;
 const sorted = list => [...list].sort((a, b) => a.localeCompare(b));
 
@@ -232,6 +275,33 @@ function checkManifest(root, fail) {
   }
 }
 
+// Key order doesn't matter, so compare with keys sorted.
+const canonical = value => JSON.stringify(value, (key, inner) =>
+  inner && typeof inner === 'object' && !Array.isArray(inner)
+    ? Object.fromEntries(Object.keys(inner).sort((a, b) => a.localeCompare(b)).map(name => [name, inner[name]]))
+    : inner);
+
+function checkPinnedFiles(root, fail) {
+  for (const [file, expected] of Object.entries(PINNED_FILES)) {
+    const text = readText(root, file);
+    const actual = text === null ? 'missing' : createHash('sha256').update(text).digest('hex');
+    if (actual !== expected) fail('pinned-file', file, 'changed since it was reviewed; check what it ships, then update its hash in PINNED_FILES');
+  }
+}
+
+function checkFirefox(root, fail) {
+  const file = 'tools/firefox.json';
+  let config;
+  try {
+    config = JSON.parse(readText(root, file));
+  } catch {
+    return fail('firefox', file, 'tools/firefox.json is missing or is not valid JSON');
+  }
+  if (canonical(config) !== canonical(FIREFOX)) {
+    fail('firefox', file, 'the Firefox build settings must stay exactly as reviewed: what ships, its reach, its add-on ID and its data declaration');
+  }
+}
+
 // Both zip steps in release.yml must package exactly SHIPPED, so nothing unchecked ships.
 function checkPackaging(root, fail) {
   const file = '.github/workflows/release.yml';
@@ -239,6 +309,7 @@ function checkPackaging(root, fail) {
   if (text === null) return fail('packaging', file, 'release.yml is missing');
   // "zip -r -X name.zip files…" and "cp -R files… destination", read word by word.
   const lists = text.split('\n').flatMap(line => {
+    if (FIREFOX_ZIP_STEP.test(line)) return [];
     const words = line.replaceAll(/[()]/g, ' ').trim().split(/\s+/);
     const zip = words.indexOf('zip');
     if (zip !== -1 && words[zip + 1] === '-r' && words[zip + 2] === '-X') return [words.slice(zip + 4)];
@@ -411,6 +482,8 @@ export function checkRepository(root, base) {
   const fail = (rule, file, message, line) => problems.push({ rule, file, line, message });
 
   checkManifest(root, fail);
+  checkFirefox(root, fail);
+  checkPinnedFiles(root, fail);
   checkPackaging(root, fail);
   checkPins(root, fail);
   for (const file of listFiles(root)) {

