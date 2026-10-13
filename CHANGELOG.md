@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.1.2...v1.2.0) (2026-10-13)
+
+
+### Features
+
+* run in Firefox too ([#19](https://github.com/AstroCaleb/virtual-cards-extension/issues/19)) ([8643366](https://github.com/AstroCaleb/virtual-cards-extension/commit/8643366a36c5e365545793ca8d4675c46e3401c9))
+
 ## [1.1.2](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.1.1...v1.1.2) (2026-10-06)
 
 
