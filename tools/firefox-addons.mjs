@@ -44,9 +44,13 @@ function token() {
 }
 
 async function call(method, path, body) {
+  // Part of some paths comes back from the API. Whatever it holds, the signed request only
+  // ever goes to the API's own origin and under /api/v5/.
+  const url = new URL(`/api/v5/${path}`, API);
+  if (url.origin !== new URL(API).origin || !url.pathname.startsWith('/api/v5/')) fail(`Refusing to call ${url.href}`);
   const headers = { Authorization: `JWT ${token()}` };
   if (body && !(body instanceof FormData)) headers['Content-Type'] = 'application/json';
-  const response = await fetch(`${API}/api/v5/${path}`, {
+  const response = await fetch(url, {
     method,
     headers,
     body: body instanceof FormData ? body : body && JSON.stringify(body),
