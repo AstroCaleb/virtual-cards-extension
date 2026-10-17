@@ -28,6 +28,9 @@ function run({ innerText, pathname = '/vc/virtual-cards/manager/manage' }) {
   return sent;
 }
 
+// Stands in for the rest of a page: enough text to put something out of reach of the card.
+const FILLER = 'Rewards and recent activity for your account. '.repeat(6);
+
 const cases = [
   {
     name: 'reveal screen, all on one line',
@@ -62,6 +65,31 @@ const cases = [
   {
     name: 'digits that fail the checksum send nothing',
     input: { innerText: 'Reference 1234 5678 9012 3456 Expiration 07/29' },
+    expect: null,
+  },
+  {
+    name: 'date just before the card does not beat the expiry after it',
+    input: { innerText: 'Last used 09/26 Virtual card number 4111 1111 1111 1111 Expiration 07/29 Security code 737' },
+    expect: { number: '4111111111111111', expiry: '07/29', cvv: '737' },
+  },
+  {
+    name: 'date far from the card is not taken as its expiry',
+    input: { innerText: `Virtual card number 4111 1111 1111 1111 Security code 737 ${FILLER} Offer ends 09/26` },
+    expect: { number: '4111111111111111', expiry: '', cvv: '737' },
+  },
+  {
+    name: 'checksum-valid number elsewhere on the page does not beat the card',
+    input: { innerText: `Reference 4012 8888 8888 1881 ${FILLER} Virtual card number 4111 1111 1111 1111 Expiration 07/29 Security code 737` },
+    expect: { number: '4111111111111111', expiry: '07/29', cvv: '737' },
+  },
+  {
+    name: "one number never takes the next number's expiry",
+    input: { innerText: 'Reference 4012 8888 8888 1881 Virtual card number 5555 5555 5555 4444 Exp 12/28 Security code 123' },
+    expect: { number: '5555555555554444', expiry: '12/28', cvv: '123' },
+  },
+  {
+    name: 'two numbers with no expiry near either send nothing',
+    input: { innerText: 'Reference 4012 8888 8888 1881 Card 4111 1111 1111 1111' },
     expect: null,
   },
 ];
