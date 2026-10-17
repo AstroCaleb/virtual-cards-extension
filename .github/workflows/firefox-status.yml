@@ -1,0 +1,29 @@
+name: Firefox Add-ons status
+
+# Run by hand from the Actions tab: shows which version is listed and which was submitted
+# last, and proves the API key still works without waiting for a release. The key lives in
+# an environment only main can use, so run it there.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    name: Add-ons status
+    runs-on: ubuntu-latest
+    environment: addons-mozilla-org
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show the Add-ons status
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: node tools/firefox-addons.mjs status

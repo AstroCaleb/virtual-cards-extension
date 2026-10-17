@@ -158,7 +158,9 @@ One-time setup, after the first version is submitted:
 4. In Settings → Secrets and variables → Actions → **Variables**, add `AMO_ADDON_ID` set to
    `virtual-card-helper@astrocaleb`. The Firefox job is skipped until it exists.
 
-To check where a version stands, use the Developer Hub, or run
+To check where a version stands, run the **Firefox Add-ons status** workflow (Actions tab →
+Run workflow, on `main`). It prints what's listed and what was submitted last, and fails if
+the API key no longer works. You can also use the Developer Hub, or run
 `node tools/firefox-addons.mjs status` with the two secrets set in your shell.
 
 ## Version history
