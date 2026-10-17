@@ -119,6 +119,7 @@ let autoOpen = true;
 let autoOpenedTabId = null; // one unprompted tab is enough; never pile them up
 let returnToTab = null; // where you were before any detour over to Capital One
 let signInShown = false; // the signed-out tab is already in front; once per sign-in
+let sentHome = false; // the tab was already sent to Capital One's home since the last good load
 let suggestTimer;
 const suggestionCache = new Map(); // host -> matches, so browsing does not re-query
 
@@ -338,8 +339,12 @@ async function bringSignInForward() {
   // Only a page that has finished loading somewhere other than the sign-in site needs
   // sending on: the "Log Back In" page, or an account page left over from before. Anything
   // still loading is already on its way to sign-in, and a half-typed sign-in stays put.
+  // Only once until a load succeeds, though. Sending the tab changes its address, which
+  // reloads the panel; if that load fails too, sending it again would loop forever.
   const settled = tab.status === 'complete' && !tab.url?.startsWith('https://verified.capitalone.com/');
-  await showTab(tab, settled ? CAPITAL_ONE_HOME : undefined);
+  const sendHome = settled && !sentHome;
+  if (sendHome) sentHome = true;
+  await showTab(tab, sendHome ? CAPITAL_ONE_HOME : undefined);
   return true;
 }
 
@@ -1024,6 +1029,7 @@ async function refresh() {
     renderCards();
     needsData = false;
     signInShown = false;
+    sentHome = false;
     const counted = cards.length === total ? `${total} card${total === 1 ? '' : 's'}` : `${cards.length} of ${total} cards`;
     if (lookupErrors.length) setStatus(`${counted}. Lookup failed: ${lookupErrors.join(', ')}.`);
     else setStatus(counted, 'info', 'center');
