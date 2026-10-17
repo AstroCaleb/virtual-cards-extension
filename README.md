@@ -5,7 +5,7 @@
 [![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-3c5e3a?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/astro_caleb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-5c6370)](LICENSE)
 
-**Your Capital One virtual cards, in a side panel in Chrome, Edge or Firefox.**
+**Your Capital One virtual cards, in a side panel in Chrome, Edge, or Firefox.**
 
 > [!IMPORTANT]
 > **Virtual Card Helper is not made by, affiliated with, or endorsed by Capital One.** It's a free, independent project from one cardholder to the others. Capital One can't help you with it, so please don't ask them to.
@@ -18,7 +18,7 @@ Capital One shut down Eno, its Chrome extension, on September 30, 2026. I used i
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
-It works in Chrome, Microsoft Edge and Firefox.
+It works in Chrome, Microsoft Edge, and Firefox.
 
 ## What it does
 
