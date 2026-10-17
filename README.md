@@ -1,10 +1,11 @@
 # Virtual Card Helper
 
 [![Chrome Web Store version](https://img.shields.io/chrome-web-store/v/aclghbjbgimapkibeejappfhclocdjcc?label=Chrome%20Web%20Store&color=0a5ed7)](https://chromewebstore.google.com/detail/virtual-card-helper/aclghbjbgimapkibeejappfhclocdjcc)
+[![Firefox Add-ons version](https://img.shields.io/amo/v/virtual-card-helper?label=Firefox%20Add-ons&color=0a5ed7)](https://addons.mozilla.org/firefox/addon/virtual-card-helper/)
 [![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-3c5e3a?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/astro_caleb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-5c6370)](LICENSE)
 
-**Your Capital One virtual cards, in a Chrome side panel.**
+**Your Capital One virtual cards, in a side panel in Chrome, Edge, or Firefox.**
 
 > [!IMPORTANT]
 > **Virtual Card Helper is not made by, affiliated with, or endorsed by Capital One.** It's a free, independent project from one cardholder to the others. Capital One can't help you with it, so please don't ask them to.
@@ -17,7 +18,7 @@ Capital One shut down Eno, its Chrome extension, on September 30, 2026. I used i
 
 It's not a perfect replacement. You still sign in to Capital One yourself, and it can't fill in checkout forms for you. But it gets most of the way back.
 
-It works in Chrome and Microsoft Edge. Capital One has discontinued Eno for Firefox too, and a Firefox version is on its way to Firefox Add-ons.
+It works in Chrome, Microsoft Edge, and Firefox.
 
 ## What it does
 
@@ -28,14 +29,25 @@ It works in Chrome and Microsoft Edge. Capital One has discontinued Eno for Fire
 
 ## Install
 
+### Chrome or Edge
+
 1. Open **[Virtual Card Helper in the Chrome Web Store](https://chromewebstore.google.com/detail/virtual-card-helper/aclghbjbgimapkibeejappfhclocdjcc)** and click **Add to Chrome**. Chrome will say the extension can "read your browsing history". That's Chrome's wording for reading the address of the tab you're on, and [here's why it asks](#your-privacy).
    - Using Microsoft Edge? Open the same link. Edge first asks to allow extensions from other stores. Click **Allow**, then **Add to Chrome**.
 2. Click the puzzle-piece icon in Chrome's toolbar, then the pin next to **Virtual Card Helper**.
 
-Now click the Virtual Card Helper icon to open the panel. The first time, it explains what it does with your data. Click **Agree and continue**. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
+### Firefox
+
+1. Open **[Virtual Card Helper on Firefox Add-ons](https://addons.mozilla.org/firefox/addon/virtual-card-helper/)** and click **Add to Firefox**. Firefox lists what the extension can access and the kinds of data it handles. All of it stays between you and Capital One, and [here's why it asks](#your-privacy).
+2. Click the puzzle-piece icon in Firefox's toolbar, then the gear next to **Virtual Card Helper**, and choose **Pin to Toolbar**.
+
+It needs Firefox 140 or newer, on a computer.
+
+### Open it
+
+Click the Virtual Card Helper icon to open the panel. The first time, it explains what it does with your data. Click **Agree and continue**. If you aren't signed in, it opens Capital One's sign-in page. Sign in as usual and it brings you back.
 
 <details>
-<summary><strong>Or install it from GitHub instead</strong></summary>
+<summary><strong>Or install it in Chrome from GitHub instead</strong></summary>
 
 If you'd rather not use the Chrome Web Store, Chrome can install the extension from a folder. That needs a setting called **Developer mode**, which sounds more serious than it is. Use one install or the other, not both.
 
@@ -70,16 +82,18 @@ All of the code is in this repository, and it's short enough to read. The [priva
 <summary><strong>Why Virtual Card Helper asks for each permission</strong></summary>
 
 - **Read and change your data on myaccounts.capitalone.com.** This lets it talk to Capital One from your signed-in tab. It can't touch any other website.
-- **Tabs.** It reads the address of the tab you're on so it can suggest cards, find your Capital One tab, and bring you back afterwards. Chrome's name for this permission is "Read your browsing history." It doesn't read your history, and it doesn't keep the addresses it sees.
+- **Tabs.** It reads the address of the tab you're on so it can suggest cards, find your Capital One tab, and bring you back afterwards. Chrome's name for this permission is "Read your browsing history," and Firefox's is "Access browser tabs." It doesn't read your history, and it doesn't keep the addresses it sees.
 - **Scripting.** Lets it reconnect to a Capital One tab that was already open before the extension was installed or updated.
 - **Storage.** Saves the nicknames and settings listed above.
-- **Side panel.** Shows the panel beside the page you're on.
+- **Side panel** (Chrome and Edge) **or sidebar** (Firefox). Shows the panel beside the page you're on.
+
+Firefox also lists the kinds of data an extension handles before you install it. For this one, that's personal information (cardholder names), financial information (your card details), browsing activity (the site you're on, for suggestions) and website content (the card details Capital One's page shows). All of it goes only to Capital One, as part of using your own account.
 
 </details>
 
 ## Updating
 
-**From the Chrome Web Store:** Chrome keeps it up to date for you.
+**From the Chrome Web Store or Firefox Add-ons:** your browser keeps it up to date for you.
 
 **From GitHub:** it doesn't update itself. When a new version comes out:
 
@@ -91,7 +105,7 @@ Your nicknames and settings carry over. To hear about new versions, click **Watc
 
 ## Good to know
 
-- It works in Chrome 116 or newer and in Microsoft Edge, on a computer. A Firefox version (Firefox 140 or newer) is on its way to Firefox Add-ons.
+- It works in Chrome 116 or newer, Microsoft Edge, and Firefox 140 or newer, on a computer. It doesn't work in Firefox for Android.
 - If Capital One changes its website, the extension may stop working until I update it.
 - It can't fill in checkout forms. You copy and paste.
 
@@ -123,6 +137,6 @@ After editing `sidepanel/`, reload the extension. After editing `content/` or `s
 
 The Firefox version is the same files with its own manifest. `node tools/build-firefox.mjs` builds it into `dist/firefox`, and [CONTRIBUTING.md](CONTRIBUTING.md) explains how to try it.
 
-Releases are automated. Commits to `main` that start with `fix:` or `feat:` open a release pull request, and merging it publishes the new version on GitHub and submits it to the Chrome Web Store and Firefox Add-ons for review. Each release also carries `virtual-cards-extension-firefox.zip`, the package sent to Firefox Add-ons. Firefox only keeps add-ons that Mozilla has signed, so that zip isn't meant for installing by hand.
+Releases are automated. Commits to `main` that start with `fix:` or `feat:` open a release pull request, and merging it publishes the new version on GitHub and submits it to the Chrome Web Store and Firefox Add-ons for review. Each release also carries `virtual-cards-extension-firefox.zip`, the package sent to Firefox Add-ons. Firefox only keeps add-ons that Mozilla has signed, so that zip isn't meant for installing by hand. Install from Firefox Add-ons instead.
 
 </details>

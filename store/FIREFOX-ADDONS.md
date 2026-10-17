@@ -6,7 +6,7 @@ whenever permissions or data handling change.
 
 **Add-on ID:** `virtual-card-helper@astrocaleb` (permanent once published)
 
-**Listing:** https://addons.mozilla.org/firefox/addon/virtual-card-helper/ (once approved)
+**Listing:** https://addons.mozilla.org/firefox/addon/virtual-card-helper/ (Public)
 
 ## The Firefox build
 
@@ -93,6 +93,10 @@ Source code and privacy policy: https://github.com/AstroCaleb/virtual-cards-exte
 
 **Support site:** https://github.com/AstroCaleb/virtual-cards-extension#questions-or-problems
 
+**Contributions URL** (shows a "Support this developer" button): https://ko-fi.com/astro_caleb
+
+**Tags:** shopping
+
 **Privacy policy:** paste the text of [PRIVACY.md](../PRIVACY.md).
 
 **Screenshots:** `store/screenshots/1-card-list.png`, `2-cardholder-filter.png` and
@@ -161,3 +165,4 @@ To check where a version stands, use the Developer Hub, or run
 
 | Version | Date | Notes | Status |
 | --- | --- | --- | --- |
+| 1.2.0 | 2026-10-13 | First submission, by hand | Published 2026-10-16 |
