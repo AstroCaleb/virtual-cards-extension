@@ -36,7 +36,11 @@
 
     let before = null;
     pattern.lastIndex = Math.max(card.start - NEAR_BEFORE, card.previous);
-    for (let match; (match = pattern.exec(text)) && match.index + match[0].length <= card.start; ) before = match;
+    let match = pattern.exec(text);
+    while (match && match.index + match[0].length <= card.start) {
+      before = match;
+      match = pattern.exec(text);
+    }
     return before;
   }
 
