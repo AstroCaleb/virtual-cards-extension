@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.2.0...v1.2.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* only pair a card number with an expiry and security code beside it ([#23](https://github.com/AstroCaleb/virtual-cards-extension/issues/23)) ([a1a6957](https://github.com/AstroCaleb/virtual-cards-extension/commit/a1a695729e80fd56cf80cb05c3d83e1cdf4b22bd))
+* stop the panel sending Capital One's tab around in a loop when sign-in fails ([#24](https://github.com/AstroCaleb/virtual-cards-extension/issues/24)) ([a08cbf1](https://github.com/AstroCaleb/virtual-cards-extension/commit/a08cbf19ba27728bd1c0437252eb51ccfae7fa18))
+
 ## [1.2.0](https://github.com/AstroCaleb/virtual-cards-extension/compare/v1.1.2...v1.2.0) (2026-10-13)
 
 
