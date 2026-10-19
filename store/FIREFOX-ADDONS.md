@@ -167,5 +167,5 @@ the API key no longer works. You can also use the Developer Hub, or run
 
 | Version | Date | Notes | Status |
 | --- | --- | --- | --- |
-| 1.2.1 | 2026-10-17 | First automatic upload. Takes the expiry and security code only from beside the card number, and stops the Capital One tab looping when sign-in fails | In review |
+| 1.2.1 | 2026-10-17 | First automatic upload. Takes the expiry and security code only from beside the card number, and stops the Capital One tab looping when sign-in fails | Published 2026-10-17 |
 | 1.2.0 | 2026-10-13 | First submission, by hand | Published 2026-10-16 |
