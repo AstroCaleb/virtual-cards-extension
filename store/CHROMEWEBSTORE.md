@@ -230,6 +230,7 @@ echo "GCP_WORKLOAD_IDENTITY_PROVIDER=projects/${PROJECT_NUMBER}/locations/global
 
 | Version | Date | Notes | Status |
 | --- | --- | --- | --- |
+| 1.2.1 | 2026-10-17 | Takes the expiry and security code only from beside the card number, and stops the Capital One tab looping when sign-in fails | Published 2026-10-19 |
 | 1.2.0 | 2026-10-13 | Adds Firefox support (same code); the clipboard message no longer names Chrome | Published 2026-10-14 |
 | 1.1.2 | 2026-10-07 | Brings the Capital One tab forward when a session ends, and blocks network requests from the panel with a content security policy | Published 2026-10-07 |
 | 1.1.1 | 2026-09-24 | Carries the store's own key, so GitHub installs share its ID | Published 2026-09-24 |
